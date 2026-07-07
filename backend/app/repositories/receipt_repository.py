@@ -31,3 +31,14 @@ def create_receipt(
     db.refresh(db_receipt)
 
     return db_receipt
+
+def get_receipts(db: Session, limit: int = 50):
+    """
+    Retrieve a list of receipts from the database.
+    """
+    return (
+        db.query(Receipt)
+        .order_by(Receipt.created_at.desc())
+        .limit(limit)
+        .all()
+    )

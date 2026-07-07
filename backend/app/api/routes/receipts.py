@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.repositories.receipt_repository import create_receipt
+from app.repositories.receipt_repository import create_receipt,get_receipts 
 
 from app.services.file_service import save_uploaded_file
 from app.schemas.upload_schema import UploadReceiptResponse
@@ -10,6 +10,7 @@ from app.services.ocr_service import extract_text_from_file
 from app.services.classification_service import classify_document
 from app.services.extraction_service import extract_structured_data
 from app.services.business_validation_service import validate_extracted_data
+from app.schemas.receipt_schema import ReceiptListItem
 
 router = APIRouter()
 @router.post("/upload", response_model=UploadReceiptResponse)
@@ -42,3 +43,11 @@ async def upload_receipt(file : UploadFile = File(...), db: Session = Depends(ge
         validation_result=validation_result,
         message="File uploaded, processed, structured, validated and saved successfully.",
     )
+
+@router.get("/", response_model=list[ReceiptListItem])
+def list_receipts(db: Session = Depends(get_db), limit: int = 50):
+    """
+    Retrieve a list of receipts from the database.
+    """
+    receipts = get_receipts(db, limit=limit)
+    return receipts
