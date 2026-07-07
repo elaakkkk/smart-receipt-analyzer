@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
 
 from app.services.file_service import save_uploaded_file
+from app.schemas.upload_schema import UploadReceiptResponse
 
 router = APIRouter()
-@router.post("/upload")
-async def upload_receipt(file : UploadFile = File(...)) -> dict[str, str]:
+@router.post("/upload", response_model=UploadReceiptResponse)
+async def upload_receipt(file : UploadFile = File(...)) -> UploadReceiptResponse:
     allowed_extensions = ["pdf", "png", "jpg", "jpeg"]
     
     if(file is None):
@@ -14,9 +15,9 @@ async def upload_receipt(file : UploadFile = File(...)) -> dict[str, str]:
     
     dest_path = await save_uploaded_file(file)
     
-    return {
-        "filename": file.filename,
-        "content_type": file.content_type,
-        "saved_path": dest_path,
-        "message": "File uploaded and saved successfully"
-    }
+    return UploadReceiptResponse(
+        filename=file.filename,
+        content_type=file.content_type,
+        saved_path=dest_path,
+        message="File uploaded and saved successfully"
+    )
