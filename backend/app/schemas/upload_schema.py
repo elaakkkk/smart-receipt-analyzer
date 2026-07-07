@@ -8,4 +8,5 @@ class UploadReceiptResponse(BaseModel):
     filename: str
     content_type: str
     saved_path: str
+    extracted_text: str 
     message: str
