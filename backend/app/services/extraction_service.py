@@ -1,5 +1,3 @@
-import datetime
-
 from app.schemas.receipt_schema import ExtractedReceiptData
 
 def extract_structured_data(extracted_text: str, document_type: str) -> ExtractedReceiptData:
@@ -17,7 +15,7 @@ def extract_structured_data(extracted_text: str, document_type: str) -> Extracte
         structured_data = {
             "merchant_name": "Unknown merchant",
             "total_amount": None,
-            "purchase_date": datetime.now().strftime("%Y-%m-%d"),
+            "purchase_date": None,
             "currency": "EUR",
             "items": []
         }
