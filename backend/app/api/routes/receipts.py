@@ -1,4 +1,7 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File
+from sqlalchemy.orm import Session
+from app.db.database import get_db
+from app.repositories.receipt_repository import create_receipt
 
 from app.services.file_service import save_uploaded_file
 from app.schemas.upload_schema import UploadReceiptResponse
@@ -10,13 +13,23 @@ from app.services.business_validation_service import validate_extracted_data
 
 router = APIRouter()
 @router.post("/upload", response_model=UploadReceiptResponse)
-async def upload_receipt(file : UploadFile = File(...)) -> UploadReceiptResponse:
+async def upload_receipt(file : UploadFile = File(...), db: Session = Depends(get_db)) -> UploadReceiptResponse:
     validate_uploaded_file(file)
     dest_path = await save_uploaded_file(file)
     extracted_text = extract_text_from_file(dest_path)
     document_type = classify_document(extracted_text)
     structured_data = extract_structured_data(extracted_text, document_type)
     validation_result = validate_extracted_data(structured_data)
+    create_receipt(
+        db=db,
+        original_filename=file.filename,
+        content_type=file.content_type,
+        saved_path=dest_path,
+        extracted_text=extracted_text,
+        document_type=document_type,
+        structured_data=structured_data.model_dump(),
+        validation_result=validation_result.model_dump()
+    )
 
     return UploadReceiptResponse(
         filename=file.filename,
