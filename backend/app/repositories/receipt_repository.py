@@ -42,3 +42,9 @@ def get_receipts(db: Session, limit: int = 50):
         .limit(limit)
         .all()
     )
+
+def get_receipt_by_id(db: Session, receipt_id: int):
+    """
+    Retrieve a receipt by its ID from the database.
+    """
+    return db.query(Receipt).filter(Receipt.id == receipt_id).first()

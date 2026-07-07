@@ -21,3 +21,15 @@ class ReceiptListItem(BaseModel):
     document_type: str | None 
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)  # Enable ORM mode for SQLAlchemy models
+
+class ReceiptDetail(ReceiptListItem):
+    id: int
+    original_filename: str
+    content_type: str
+    saved_path: str
+    extracted_text: str | None
+    document_type: str | None
+    structured_data: dict | None   
+    validation_result: dict | None
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)  # Enable ORM mode for SQLAlchemy models
