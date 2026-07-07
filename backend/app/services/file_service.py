@@ -1,5 +1,5 @@
 import os
-from uuid import UUID
+import uuid
 
 from fastapi import UploadFile
 
@@ -15,10 +15,11 @@ async def save_uploaded_file(file: UploadFile) -> str:
     """
     # Create the 'uploads' directory if it doesn't exist
     os.makedirs("uploads", exist_ok=True)
-    uuid = UUID()
+    safe_filename = file.filename.replace(" ", "_")
+    unique_id = str(uuid.uuid4())[:8]
 
     # Define the destination path for the uploaded file
-    dest_path = os.path.join("uploads", f"{uuid.uuid4()}-{file.filename}")
+    dest_path = os.path.join("uploads", f"{unique_id}-{safe_filename}")
 
     # Save the uploaded file to the destination path
     with open(dest_path, "wb") as f:
