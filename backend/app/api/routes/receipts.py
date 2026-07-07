@@ -5,6 +5,8 @@ from app.schemas.upload_schema import UploadReceiptResponse
 from app.services.validation_service import validate_uploaded_file
 from app.services.ocr_service import extract_text_from_file
 from app.services.classification_service import classify_document
+from app.services.extraction_service import extract_structured_data
+from app.services.business_validation_service import validate_extracted_data
 
 router = APIRouter()
 @router.post("/upload", response_model=UploadReceiptResponse)
@@ -13,6 +15,8 @@ async def upload_receipt(file : UploadFile = File(...)) -> UploadReceiptResponse
     dest_path = await save_uploaded_file(file)
     extracted_text = extract_text_from_file(dest_path)
     document_type = classify_document(extracted_text)
+    structured_data = extract_structured_data(extracted_text, document_type)
+    validation_result = validate_extracted_data(structured_data)
 
     return UploadReceiptResponse(
         filename=file.filename,
@@ -20,5 +24,7 @@ async def upload_receipt(file : UploadFile = File(...)) -> UploadReceiptResponse
         saved_path=dest_path,
         extracted_text=extracted_text,
         document_type=document_type,
-        message="File uploaded and saved successfully and text extracted and classified.",
+        structured_data=structured_data,
+        validation_result=validation_result,
+        message="File uploaded, processed, structured and validated successfully.",
     )

@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.schemas.receipt_schema import ExtractedReceiptData, ValidationResult
+
 
 class UploadReceiptResponse(BaseModel):
     """
@@ -10,4 +12,6 @@ class UploadReceiptResponse(BaseModel):
     saved_path: str
     extracted_text: str 
     document_type: str
+    structured_data: ExtractedReceiptData 
+    validation_result: ValidationResult 
     message: str
