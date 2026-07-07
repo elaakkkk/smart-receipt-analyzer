@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.repositories.receipt_repository import create_receipt, get_receipt_by_id,get_receipts 
+from app.repositories.receipt_repository import create_receipt, delete_receipt, get_receipt_by_id,get_receipts 
 
 from app.services.file_service import save_uploaded_file
 from app.schemas.upload_schema import UploadReceiptResponse
@@ -10,7 +10,7 @@ from app.services.ocr_service import extract_text_from_file
 from app.services.classification_service import classify_document
 from app.services.extraction_service import extract_structured_data
 from app.services.business_validation_service import validate_extracted_data
-from app.schemas.receipt_schema import ReceiptDetail, ReceiptListItem
+from app.schemas.receipt_schema import DeleteReceiptResponse, ReceiptDetail, ReceiptListItem
 
 router = APIRouter()
 @router.post("/upload", response_model=UploadReceiptResponse)
@@ -61,3 +61,16 @@ def get_receipt_detail(receipt_id: int, db: Session = Depends(get_db)):
     if not receipt:
         raise HTTPException(status_code=404, detail="Receipt not found")
     return receipt
+
+@router.delete("/{receipt_id}", response_model=DeleteReceiptResponse)
+def delete_receipt_by_id(receipt_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a receipt by its ID from the database.
+    """
+    deleted_receipt = delete_receipt(db, receipt_id)
+    if not deleted_receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+    return DeleteReceiptResponse(
+        receipt_id=receipt_id,
+        message="Receipt deleted successfully"
+    )

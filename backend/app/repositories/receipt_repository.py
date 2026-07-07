@@ -48,3 +48,14 @@ def get_receipt_by_id(db: Session, receipt_id: int):
     Retrieve a receipt by its ID from the database.
     """
     return db.query(Receipt).filter(Receipt.id == receipt_id).first()
+
+def delete_receipt(db: Session, receipt_id: int)-> Receipt | None:
+    """
+    Delete a receipt by its ID from the database.
+    """
+    receipt = get_receipt_by_id(db, receipt_id)
+    if receipt is None:
+        return None
+    db.delete(receipt)
+    db.commit()
+    return receipt
