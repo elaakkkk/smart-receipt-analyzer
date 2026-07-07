@@ -20,7 +20,7 @@ async def upload_receipt(file : UploadFile = File(...), db: Session = Depends(ge
     document_type = classify_document(extracted_text)
     structured_data = extract_structured_data(extracted_text, document_type)
     validation_result = validate_extracted_data(structured_data)
-    create_receipt(
+    created_receipt = create_receipt(
         db=db,
         original_filename=file.filename,
         content_type=file.content_type,
@@ -32,6 +32,7 @@ async def upload_receipt(file : UploadFile = File(...), db: Session = Depends(ge
     )
 
     return UploadReceiptResponse(
+        receipt_id=created_receipt.id,
         filename=file.filename,
         content_type=file.content_type,
         saved_path=dest_path,
@@ -39,5 +40,5 @@ async def upload_receipt(file : UploadFile = File(...), db: Session = Depends(ge
         document_type=document_type,
         structured_data=structured_data,
         validation_result=validation_result,
-        message="File uploaded, processed, structured and validated successfully.",
+        message="File uploaded, processed, structured, validated and saved successfully.",
     )
