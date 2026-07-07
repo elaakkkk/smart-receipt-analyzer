@@ -26,3 +26,15 @@ async def save_uploaded_file(file: UploadFile) -> str:
         f.write(await file.read())
 
     return dest_path
+
+def delete_local_file(file_path: str) -> bool:
+    """
+    Delete a local file.
+
+    Args:
+        file_path (str): The path of the file to be deleted.
+    """
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return True
+    return False

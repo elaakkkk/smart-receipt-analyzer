@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.repositories.receipt_repository import create_receipt, delete_receipt, get_receipt_by_id,get_receipts 
 
-from app.services.file_service import save_uploaded_file
+from app.services.file_service import delete_local_file, save_uploaded_file
 from app.schemas.upload_schema import UploadReceiptResponse
 from app.services.validation_service import validate_uploaded_file
 from app.services.ocr_service import extract_text_from_file
@@ -69,7 +69,8 @@ def delete_receipt_by_id(receipt_id: int, db: Session = Depends(get_db)):
     """
     deleted_receipt = delete_receipt(db, receipt_id)
     if not deleted_receipt:
-        raise HTTPException(status_code=404, detail="Receipt not found")
+        raise HTTPException(status_code=404, detail="Receipt not found.")
+    delete_local_file(deleted_receipt.saved_path)
     return DeleteReceiptResponse(
         receipt_id=receipt_id,
         message="Receipt deleted successfully"
