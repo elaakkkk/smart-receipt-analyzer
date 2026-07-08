@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { AnalyticsCharts, AnalyticsSummary, DocumentTypesStats, ValidationStats } from '../../core/models/analytics.model';
 
@@ -19,6 +19,7 @@ export class Dashboard implements OnInit{
 
   constructor(
     private analyticsService: AnalyticsService,
+    private cdr: ChangeDetectorRef
   ){}
   ngOnInit(): void {
     this.loadDashboardData();
@@ -32,6 +33,7 @@ export class Dashboard implements OnInit{
       next: (data) => {
         this.summary = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Unable to load dashboard summary.';
@@ -42,6 +44,7 @@ export class Dashboard implements OnInit{
     this.analyticsService.getDocumentTypes().subscribe({
       next: (data) => {
         this.documentTypes = data;
+        this.cdr.detectChanges();
       },
       error : () => {
         this.errorMessage = 'Unable to load document type statistics.';
@@ -51,6 +54,7 @@ export class Dashboard implements OnInit{
     this.analyticsService.getValidationStats().subscribe({
       next: (data) => {
         this.validationStats= data ;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Unable to load validation stats.'
