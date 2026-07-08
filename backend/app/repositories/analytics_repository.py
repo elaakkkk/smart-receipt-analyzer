@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.receipt import Receipt
-from app.schemas.analytics_schema import AnalyticsSummaryResponse
+from app.schemas.analytics_schema import AnalyticsSummaryResponse, DocumentTypesStatsResponse
 
 
 def get_analytics_summary(db: Session) -> AnalyticsSummaryResponse:
@@ -42,3 +42,27 @@ def get_analytics_summary(db: Session) -> AnalyticsSummaryResponse:
         receipt_documents=receipt_documents,
         invoice_documents=invoice_documents,
     )
+
+def get_document_types_stats(db: Session) -> DocumentTypesStatsResponse:
+    """
+    Retrieve document types statistics from the database.
+    """
+    receipts = db.query(Receipt).all()
+
+    unknown_count = 0
+    receipt_count = 0
+    invoice_count = 0
+
+    for receipt in receipts:
+        if receipt.document_type == "unknown":
+            unknown_count += 1
+        elif receipt.document_type == "receipt":
+            receipt_count += 1
+        elif receipt.document_type == "invoice":
+            invoice_count += 1
+
+    return {
+        "unknown": unknown_count,
+        "receipt": receipt_count,
+        "invoice": invoice_count,
+    }

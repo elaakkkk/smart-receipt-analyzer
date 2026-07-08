@@ -8,3 +8,8 @@ class AnalyticsSummaryResponse(BaseModel):
     unknown_documents: int
     receipt_documents: int
     invoice_documents: int
+
+class DocumentTypesStatsResponse(BaseModel):
+    unknown: int
+    receipt: int
+    invoice: int
