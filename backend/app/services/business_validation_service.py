@@ -24,7 +24,7 @@ def validate_extracted_data(structured_data: ExtractedReceiptData) -> Validation
         errors.append("Total amount must be greater than zero.")
 
     if structured_data.currency is None or structured_data.currency == "":
-        errors.append(f"Currency '{structured_data.currency}' is not recognized. Defaulting to 'EUR'.")
+        errors.append("Currency is missing or invalid.")
     
     if not structured_data.items:
         warnings.append("No items were extracted.")
