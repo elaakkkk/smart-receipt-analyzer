@@ -1,66 +1,122 @@
-<section class="dashboard">
-  <header class="dashboard-header">
-    <h1>Smart Receipt Analyzer</h1>
-    <p>OCR, structured extraction and analytics dashboard</p>
-  </header>
-
-  @if (loading) {
-    <p class="info">Loading dashboard...</p>
-  }
-
-  @if (errorMessage) {
-    <p class="error">{{ errorMessage }}</p>
-  }
-
-  @if (summary) {
-    <div class="cards-grid">
-      <div class="card">
-        <span class="label">Total receipts</span>
-        <strong>{{ summary.total_receipts }}</strong>
+<section class="dashboard-page">
+  <div class="dashboard-container">
+    <header class="dashboard-hero">
+      <div>
+        <span class="eyebrow">AI Receipt Analytics</span>
+        <h1>Smart Receipt Analyzer</h1>
+        <p>
+          Upload receipts, extract structured data with OCR, validate the result,
+          and monitor document analytics in one place.
+        </p>
       </div>
 
-      <div class="card">
-        <span class="label">Valid receipts</span>
-        <strong>{{ summary.valid_receipts }}</strong>
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        FastAPI + Angular
       </div>
+    </header>
 
-      <div class="card">
-        <span class="label">Invalid receipts</span>
-        <strong>{{ summary.invalid_receipts }}</strong>
+    @if (loading) {
+      <div class="state-card">
+        Loading dashboard data...
       </div>
+    }
 
-      <div class="card">
-        <span class="label">Unknown documents</span>
-        <strong>{{ summary.unknown_documents }}</strong>
+    @if (errorMessage) {
+      <div class="state-card error">
+        {{ errorMessage }}
       </div>
+    }
 
-      <div class="card">
-        <span class="label">Receipt documents</span>
-        <strong>{{ summary.receipt_documents }}</strong>
-      </div>
+    @if (summary) {
+      <section class="kpi-grid">
+        <article class="kpi-card primary">
+          <span>Total receipts</span>
+          <strong>{{ summary.total_receipts }}</strong>
+          <p>Documents processed</p>
+        </article>
 
-      <div class="card">
-        <span class="label">Invoice documents</span>
-        <strong>{{ summary.invoice_documents }}</strong>
-      </div>
-    </div>
-  }
+        <article class="kpi-card success">
+          <span>Valid receipts</span>
+          <strong>{{ summary.valid_receipts }}</strong>
+          <p>Accepted after validation</p>
+        </article>
 
-  @if (validationStats) {
-    <section class="section">
-      <h2>Validation status</h2>
+        <article class="kpi-card danger">
+          <span>Invalid receipts</span>
+          <strong>{{ summary.invalid_receipts }}</strong>
+          <p>Rejected or incomplete</p>
+        </article>
 
-      <div class="cards-grid">
-        <div class="card">
-          <span class="label">With warnings</span>
-          <strong>{{ validationStats.with_warnings }}</strong>
-        </div>
+        <article class="kpi-card warning">
+          <span>Unknown documents</span>
+          <strong>{{ summary.unknown_documents }}</strong>
+          <p>Need better classification</p>
+        </article>
+      </section>
+    }
 
-        <div class="card">
-          <span class="label">Without warnings</span>
-          <strong>{{ validationStats.without_warnings }}</strong>
-        </div>
-      </div>
+    <section class="content-grid">
+      @if (summary) {
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Document classification</h2>
+              <p>Distribution by predicted document type</p>
+            </div>
+          </div>
+
+          <div class="mini-stats">
+            <div>
+              <span>Receipts</span>
+              <strong>{{ summary.receipt_documents }}</strong>
+            </div>
+
+            <div>
+              <span>Invoices</span>
+              <strong>{{ summary.invoice_documents }}</strong>
+            </div>
+
+            <div>
+              <span>Unknown</span>
+              <strong>{{ summary.unknown_documents }}</strong>
+            </div>
+          </div>
+        </article>
+      }
+
+      @if (validationStats) {
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Validation quality</h2>
+              <p>Result of business rule validation</p>
+            </div>
+          </div>
+
+          <div class="mini-stats">
+            <div>
+              <span>Valid</span>
+              <strong>{{ validationStats.valid }}</strong>
+            </div>
+
+            <div>
+              <span>Invalid</span>
+              <strong>{{ validationStats.invalid }}</strong>
+            </div>
+
+            <div>
+              <span>With warnings</span>
+              <strong>{{ validationStats.with_warnings }}</strong>
+            </div>
+
+            <div>
+              <span>Without warnings</span>
+              <strong>{{ validationStats.without_warnings }}</strong>
+            </div>
+          </div>
+        </article>
+      }
     </section>
-  }
+  </div>
 </section>
