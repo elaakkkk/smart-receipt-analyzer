@@ -1,0 +1,83 @@
+.app-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.86);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(16px);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: white;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-radius: 14px;
+  font-weight: 900;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-brand strong {
+  display: block;
+  font-size: 15px;
+}
+
+.nav-brand small {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-links a {
+  padding: 10px 14px;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+.nav-links a:hover {
+  color: var(--color-text);
+  background: var(--color-surface-soft);
+}
+
+.nav-links a.active {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-soft);
+}
+
+@media (max-width: 640px) {
+  .app-navbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nav-links {
+    width: 100%;
+  }
+
+  .nav-links a {
+    flex: 1;
+    text-align: center;
+  }
+}
