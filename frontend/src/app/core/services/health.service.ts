@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../constants/api.constants';
+import { HealthResponse } from '../models/health.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class HealthService {
 
   constructor(private http: HttpClient) {}
 
-  getHealth(): Observable<unknown> {
-    return this.http.get(`${this.baseUrl}/api/health`);
+  getHealth(): Observable<HealthResponse> {
+    return this.http.get<HealthResponse>(`${this.baseUrl}/api/health`);
   }
 }

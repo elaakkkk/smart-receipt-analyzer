@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../constants/api.constants';
+import { DeleteReceiptResponse, ReceiptDetail, ReceiptListItem, UploadReceiptResponse } from '../models/receipt.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,22 +12,22 @@ export class ReceiptService {
 
   constructor(private http: HttpClient) {}
 
-  getReceipts(): Observable<unknown> {
-    return this.http.get(`${this.baseUrl}/api/receipts`);
+  getReceipts(): Observable<ReceiptListItem[]> {
+    return this.http.get<ReceiptListItem[]>(`${this.baseUrl}/api/receipts`);
   }
 
-  getReceiptById(id: number): Observable<unknown> {
-    return this.http.get(`${this.baseUrl}/api/receipts/${id}`);
+  getReceiptById(id: number): Observable<ReceiptDetail> {
+    return this.http.get<ReceiptDetail>(`${this.baseUrl}/api/receipts/${id}`);
   }
 
-  uploadReceipt(file: File): Observable<unknown> {
+  uploadReceipt(file: File): Observable<UploadReceiptResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post(`${this.baseUrl}/api/receipts/upload`, formData);
+    return this.http.post<UploadReceiptResponse>(`${this.baseUrl}/api/receipts/upload`, formData);
   }
 
-  deleteReceipt(id: number): Observable<unknown> {
-    return this.http.delete(`${this.baseUrl}/api/receipts/${id}`);
+  deleteReceipt(id: number): Observable<DeleteReceiptResponse> {
+    return this.http.delete<DeleteReceiptResponse>(`${this.baseUrl}/api/receipts/${id}`);
   }
 }
