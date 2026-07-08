@@ -13,3 +13,9 @@ class DocumentTypesStatsResponse(BaseModel):
     unknown: int
     receipt: int
     invoice: int
+
+class ValidationStatsResponse(BaseModel):
+    valid: int
+    invalid: int
+    with_warnings: int
+    without_warnings: int
