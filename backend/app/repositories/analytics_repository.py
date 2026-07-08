@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.receipt import Receipt
-from app.schemas.analytics_schema import AnalyticsSummaryResponse, DocumentTypesStatsResponse, ValidationStatsResponse
+from app.schemas.analytics_schema import AnalyticsChartsResponse, AnalyticsSummaryResponse, DocumentTypesStatsResponse, ValidationStatsResponse
 
 
 def get_analytics_summary(db: Session) -> AnalyticsSummaryResponse:
@@ -98,4 +98,29 @@ def get_validation_stats(db: Session) -> ValidationStatsResponse:
         invalid=invalid_count,
         with_warnings=with_warnings_count,
         without_warnings=without_warnings_count,
+    )
+
+def get_charts_data(db: Session)-> AnalyticsChartsResponse:
+    """
+    Retrieve chart data for document types and validation status.
+    """
+    document_types_stats = get_document_types_stats(db)
+    validation_stats = get_validation_stats(db)
+
+    document_types_chart_data = [
+        {"label": "Unknown", "value": document_types_stats.unknown},
+        {"label": "Receipt", "value": document_types_stats.receipt},
+        {"label": "Invoice", "value": document_types_stats.invoice},
+    ]
+
+    validation_status_chart_data = [
+        {"label": "Valid", "value": validation_stats.valid},
+        {"label": "Invalid", "value": validation_stats.invalid},
+        {"label": "With Warnings", "value": validation_stats.with_warnings},
+        {"label": "Without Warnings", "value": validation_stats.without_warnings},
+    ]
+
+    return AnalyticsChartsResponse(
+        document_types=document_types_chart_data,
+        validation_status=validation_status_chart_data,
     )

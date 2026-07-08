@@ -19,3 +19,11 @@ class ValidationStatsResponse(BaseModel):
     invalid: int
     with_warnings: int
     without_warnings: int
+
+class ChartDataItem(BaseModel):
+    label: str
+    value: int
+
+class AnalyticsChartsResponse(BaseModel):
+    document_types: list[ChartDataItem]
+    validation_status: list[ChartDataItem]
