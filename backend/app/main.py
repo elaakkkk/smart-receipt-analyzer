@@ -1,16 +1,28 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.health import router as health_router
 from app.api.routes.receipts import router as receipts_router
 from app.db.database import engine, Base
 from app.models.receipt import Receipt
 from app.api.routes.analytics import router as analytics_router
 
+
 Base.metadata.create_all(bind=engine)
+allowed_origin = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200"
+]
 
 app = FastAPI(
     title="Smart Receipt Analyzer",
     description="A FastAPI application for analyzing receipts using OCR and AI models.",
     version="0.1.0",
+)
+app.add_middleware(CORSMiddleware,
+    allow_origins = allowed_origin,
+    allow_credentials = True,
+    allow_methods = ["*"],
+    allow_headers = ["*"]   
 )
 
 app.include_router(health_router, prefix="/api", tags=["Health"])
