@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
 import { API_BASE_URL } from '../constants/api.constants';
-import { DeleteReceiptResponse, ReceiptDetail, ReceiptListItem, UploadReceiptResponse } from '../models/receipt.model';
+import {
+  DeleteReceiptResponse,
+  ReceiptDetail,
+  ReceiptListItem,
+  UploadReceiptResponse
+} from '../models/receipt.model';
 
 @Injectable({
   providedIn: 'root'
@@ -24,10 +30,15 @@ export class ReceiptService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<UploadReceiptResponse>(`${this.baseUrl}/api/receipts/upload`, formData);
+    return this.http.post<UploadReceiptResponse>(
+      `${this.baseUrl}/api/receipts/upload`,
+      formData
+    );
   }
 
   deleteReceipt(id: number): Observable<DeleteReceiptResponse> {
-    return this.http.delete<DeleteReceiptResponse>(`${this.baseUrl}/api/receipts/${id}`);
+    return this.http.delete<DeleteReceiptResponse>(
+      `${this.baseUrl}/api/receipts/${id}`
+    );
   }
 }

@@ -16,6 +16,41 @@
       </div>
     </header>
 
+    <section class="upload-panel">
+      <div>
+        <h2>Upload a new receipt</h2>
+        <p>Accepted formats: PDF, PNG, JPG, JPEG.</p>
+      </div>
+
+      <div class="upload-actions">
+        <label class="file-input">
+          <input
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg"
+            (change)="onFileSelected($event)"
+          />
+          <span>
+            {{ selectedFile ? selectedFile.name : 'Choose file' }}
+          </span>
+        </label>
+
+        <button
+          type="button"
+          class="upload-button"
+          [disabled]="uploading || !selectedFile"
+          (click)="uploadReceipt()"
+        >
+          {{ uploading ? 'Uploading...' : 'Upload receipt' }}
+        </button>
+      </div>
+    </section>
+
+    @if (successMessage) {
+      <div class="state-card success">
+        {{ successMessage }}
+      </div>
+    }
+
     @if (loading) {
       <div class="state-card">
         Loading receipts...
@@ -66,7 +101,11 @@
                 {{ receipt.created_at | date:'medium' }}
               </span>
 
-              <button type="button" class="delete-button" (click)="deleteReceipt(receipt.id)">
+              <button
+                type="button"
+                class="delete-button"
+                (click)="openDeleteModal(receipt.id)"
+              >
                 Delete
               </button>
             </div>
@@ -75,4 +114,40 @@
       </section>
     }
   </div>
+    @if (showDeleteModal) {
+    <div class="modal-backdrop">
+        <div class="confirm-modal">
+        <div class="modal-icon">
+            !
+        </div>
+
+        <h2>Delete receipt?</h2>
+
+        <p>
+            This action will remove the receipt from the database and delete the
+            uploaded file from local storage.
+        </p>
+
+        <div class="modal-actions">
+            <button
+            type="button"
+            class="cancel-button"
+            (click)="closeDeleteModal()"
+            [disabled]="deleting"
+            >
+            Cancel
+            </button>
+
+            <button
+            type="button"
+            class="confirm-delete-button"
+            (click)="confirmDelete()"
+            [disabled]="deleting"
+            >
+            {{ deleting ? 'Deleting...' : 'Delete receipt' }}
+            </button>
+        </div>
+        </div>
+    </div>
+    }
 </section>
