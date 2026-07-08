@@ -1,0 +1,78 @@
+<section class="receipts-page">
+  <div class="receipts-container">
+    <header class="receipts-hero">
+      <div>
+        <span class="eyebrow">Uploaded documents</span>
+        <h1>Receipts Library</h1>
+        <p>
+          Browse uploaded receipts, review their classification status,
+          and manage processed documents.
+        </p>
+      </div>
+
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        {{ receipts.length }} documents
+      </div>
+    </header>
+
+    @if (loading) {
+      <div class="state-card">
+        Loading receipts...
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="state-card error">
+        {{ errorMessage }}
+      </div>
+    }
+
+    @if (!loading && receipts.length === 0) {
+      <div class="empty-state">
+        <h2>No receipts uploaded yet</h2>
+        <p>
+          Once you upload PDF or image receipts, they will appear here.
+        </p>
+      </div>
+    }
+
+    @if (receipts.length > 0) {
+      <section class="receipts-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Processed documents</h2>
+            <p>Latest uploaded receipts and invoices</p>
+          </div>
+        </div>
+
+        <div class="receipts-table">
+          <div class="table-header">
+            <span>File name</span>
+            <span>Document type</span>
+            <span>Created at</span>
+            <span>Actions</span>
+          </div>
+
+          @for (receipt of receipts; track receipt.id) {
+            <div class="table-row">
+              <span class="filename">{{ receipt.original_filename }}</span>
+
+              <span class="badge">
+                {{ receipt.document_type || 'Unknown' }}
+              </span>
+
+              <span class="muted">
+                {{ receipt.created_at | date:'medium' }}
+              </span>
+
+              <button type="button" class="delete-button" (click)="deleteReceipt(receipt.id)">
+                Delete
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</section>
