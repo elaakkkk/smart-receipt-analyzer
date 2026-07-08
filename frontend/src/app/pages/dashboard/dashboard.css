@@ -1,0 +1,57 @@
+.dashboard {
+  min-height: 100vh;
+  padding: 32px;
+  background: #f6f7fb;
+  color: #1f2937;
+  font-family: Arial, sans-serif;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.dashboard-header p {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.label {
+  display: block;
+  margin-bottom: 12px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.card strong {
+  font-size: 32px;
+}
+
+.section {
+  margin-top: 32px;
+}
+
+.info {
+  color: #2563eb;
+}
+
+.error {
+  color: #dc2626;
+}

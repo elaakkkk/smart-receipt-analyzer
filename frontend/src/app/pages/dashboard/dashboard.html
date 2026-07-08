@@ -1,0 +1,66 @@
+<section class="dashboard">
+  <header class="dashboard-header">
+    <h1>Smart Receipt Analyzer</h1>
+    <p>OCR, structured extraction and analytics dashboard</p>
+  </header>
+
+  @if (loading) {
+    <p class="info">Loading dashboard...</p>
+  }
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (summary) {
+    <div class="cards-grid">
+      <div class="card">
+        <span class="label">Total receipts</span>
+        <strong>{{ summary.total_receipts }}</strong>
+      </div>
+
+      <div class="card">
+        <span class="label">Valid receipts</span>
+        <strong>{{ summary.valid_receipts }}</strong>
+      </div>
+
+      <div class="card">
+        <span class="label">Invalid receipts</span>
+        <strong>{{ summary.invalid_receipts }}</strong>
+      </div>
+
+      <div class="card">
+        <span class="label">Unknown documents</span>
+        <strong>{{ summary.unknown_documents }}</strong>
+      </div>
+
+      <div class="card">
+        <span class="label">Receipt documents</span>
+        <strong>{{ summary.receipt_documents }}</strong>
+      </div>
+
+      <div class="card">
+        <span class="label">Invoice documents</span>
+        <strong>{{ summary.invoice_documents }}</strong>
+      </div>
+    </div>
+  }
+
+  @if (validationStats) {
+    <section class="section">
+      <h2>Validation status</h2>
+
+      <div class="cards-grid">
+        <div class="card">
+          <span class="label">With warnings</span>
+          <strong>{{ validationStats.with_warnings }}</strong>
+        </div>
+
+        <div class="card">
+          <span class="label">Without warnings</span>
+          <strong>{{ validationStats.without_warnings }}</strong>
+        </div>
+      </div>
+    </section>
+  }
+</section>
