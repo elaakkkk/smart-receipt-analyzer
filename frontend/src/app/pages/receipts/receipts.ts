@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
+
 import { ReceiptListItem } from '../../core/models/receipt.model';
 import { ReceiptService } from '../../core/services/receipt.service';
-import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-receipts',
@@ -9,14 +10,12 @@ import { DatePipe } from '@angular/common';
   templateUrl: './receipts.html',
   styleUrl: './receipts.css',
 })
-export class Receipts implements OnInit{
+export class Receipts implements OnInit {
   receipts: ReceiptListItem[] = [];
   loading = false;
   errorMessage = '';
 
-  constructor(
-    private receiptService: ReceiptService,
-  ){}
+  constructor(private receiptService: ReceiptService) {}
 
   ngOnInit(): void {
     this.loadReceipts();
@@ -38,14 +37,14 @@ export class Receipts implements OnInit{
     });
   }
 
-  deleteReceipt(id: number):void{
+  deleteReceipt(id: number): void {
     this.receiptService.deleteReceipt(id).subscribe({
       next: () => {
-        this.receipts = this.receipts.filter((receipt)=> receipt.id !== id);
+        this.receipts = this.receipts.filter((receipt) => receipt.id !== id);
       },
       error: () => {
         this.errorMessage = 'Unable to delete the receipt.';
-      }
+      },
     });
   }
 }
