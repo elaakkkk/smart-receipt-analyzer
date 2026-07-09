@@ -177,6 +177,7 @@
   margin: 7px 0 0;
   color: var(--color-text-muted);
   line-height: 1.5;
+  scroll-margin-top: 100px;
 }
 
 .upload-actions {

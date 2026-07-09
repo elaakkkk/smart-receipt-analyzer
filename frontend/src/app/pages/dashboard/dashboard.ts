@@ -1,10 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { AnalyticsCharts, AnalyticsSummary, DocumentTypesStats, ValidationStats } from '../../core/models/analytics.model';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -38,6 +39,7 @@ export class Dashboard implements OnInit{
       error: () => {
         this.errorMessage = 'Unable to load dashboard summary.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
 
@@ -48,6 +50,7 @@ export class Dashboard implements OnInit{
       },
       error : () => {
         this.errorMessage = 'Unable to load document type statistics.';
+        this.cdr.detectChanges();
       },
     });
 
@@ -57,7 +60,18 @@ export class Dashboard implements OnInit{
         this.cdr.detectChanges();
       },
       error: () => {
-        this.errorMessage = 'Unable to load validation stats.'
+        this.errorMessage = 'Unable to load validation stats.';
+        this.cdr.detectChanges();
+      },
+    });
+    this.analyticsService.getChartsData().subscribe({
+      next: (data) => {
+        this.chartsData = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorMessage = 'Unable to load chart data.';
+        this.cdr.detectChanges();
       },
     });
   }
