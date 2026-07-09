@@ -38,33 +38,36 @@
     }
 
     @if (summary) {
-      <section class="kpi-grid">
-        <article class="kpi-card primary">
-          <span>Total receipts</span>
-          <strong>{{ summary.total_receipts }}</strong>
-          <p>Documents processed</p>
-        </article>
+    <section class="kpi-grid">
+      <app-stat-card
+        label="Total receipts"
+        [value]="summary.total_receipts"
+        description="Documents processed"
+        variant="primary"
+      />
 
-        <article class="kpi-card success">
-          <span>Valid receipts</span>
-          <strong>{{ summary.valid_receipts }}</strong>
-          <p>Accepted after validation</p>
-        </article>
+      <app-stat-card
+        label="Valid receipts"
+        [value]="summary.valid_receipts"
+        description="Accepted after validation"
+        variant="success"
+      />
 
-        <article class="kpi-card danger">
-          <span>Invalid receipts</span>
-          <strong>{{ summary.invalid_receipts }}</strong>
-          <p>Rejected or incomplete</p>
-        </article>
+      <app-stat-card
+        label="Invalid receipts"
+        [value]="summary.invalid_receipts"
+        description="Rejected or incomplete"
+        variant="danger"
+      />
 
-        <article class="kpi-card warning">
-          <span>Unknown documents</span>
-          <strong>{{ summary.unknown_documents }}</strong>
-          <p>Need better classification</p>
-        </article>
-      </section>
-    }
-
+      <app-stat-card
+        label="Unknown documents"
+        [value]="summary.unknown_documents"
+        description="Need better classification"
+        variant="warning"
+      />
+    </section>
+  }
     <section class="content-grid">
       @if (summary) {
         <article class="panel">

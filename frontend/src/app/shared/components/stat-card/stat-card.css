@@ -1,0 +1,59 @@
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  opacity: 0.16;
+}
+
+.kpi-card.primary::after {
+  background: var(--color-primary);
+}
+
+.kpi-card.success::after {
+  background: var(--color-success);
+}
+
+.kpi-card.danger::after {
+  background: var(--color-danger);
+}
+
+.kpi-card.warning::after {
+  background: var(--color-warning);
+}
+
+.kpi-card span {
+  display: block;
+  margin-bottom: 18px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.kpi-card strong {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-text);
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.kpi-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}

@@ -3,10 +3,11 @@ import { AnalyticsService } from '../../core/services/analytics.service';
 import { AnalyticsCharts, AnalyticsSummary, DocumentTypesStats, ValidationStats } from '../../core/models/analytics.model';
 import { RouterLink } from '@angular/router';
 import { BarChart } from '../../shared/components/bar-chart/bar-chart';
+import { StatCard } from '../../shared/components/stat-card/stat-card';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, BarChart],
+  imports: [RouterLink, BarChart, StatCard],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
