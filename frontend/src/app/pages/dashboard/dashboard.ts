@@ -13,7 +13,7 @@ import { PageState } from '../../shared/components/page-state/page-state';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard implements OnInit{
+export class Dashboard implements OnInit {
   summary: AnalyticsSummary | null = null;
   documentTypes: DocumentTypesStats | null = null;
   validationStats: ValidationStats | null = null;
@@ -25,7 +25,8 @@ export class Dashboard implements OnInit{
   constructor(
     private analyticsService: AnalyticsService,
     private cdr: ChangeDetectorRef
-  ){}
+  ) {}
+  
   ngOnInit(): void {
     this.loadDashboardData();
   }
