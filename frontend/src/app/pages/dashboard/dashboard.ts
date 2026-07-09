@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { AnalyticsCharts, AnalyticsSummary, DocumentTypesStats, ValidationStats } from '../../core/models/analytics.model';
 import { RouterLink } from '@angular/router';
@@ -33,47 +34,24 @@ export class Dashboard implements OnInit{
     this.loading = true;
     this.errorMessage = '';
 
-    this.analyticsService.getAnalyticsSummary().subscribe({
+    forkJoin({
+      summary: this.analyticsService.getAnalyticsSummary(),
+      documentTypes: this.analyticsService.getDocumentTypes(),
+      validationStats: this.analyticsService.getValidationStats(),
+      chartsData: this.analyticsService.getChartsData(),
+    }).subscribe({
       next: (data) => {
-        this.summary = data;
+        this.summary = data.summary;
+        this.documentTypes = data.documentTypes;
+        this.validationStats = data.validationStats;
+        this.chartsData = data.chartsData;
+
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.errorMessage = 'Unable to load dashboard summary.';
+        this.errorMessage = 'Unable to load dashboard data.';
         this.loading = false;
-        this.cdr.detectChanges();
-      },
-    });
-
-    this.analyticsService.getDocumentTypes().subscribe({
-      next: (data) => {
-        this.documentTypes = data;
-        this.cdr.detectChanges();
-      },
-      error : () => {
-        this.errorMessage = 'Unable to load document type statistics.';
-        this.cdr.detectChanges();
-      },
-    });
-
-    this.analyticsService.getValidationStats().subscribe({
-      next: (data) => {
-        this.validationStats= data ;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load validation stats.';
-        this.cdr.detectChanges();
-      },
-    });
-    this.analyticsService.getChartsData().subscribe({
-      next: (data) => {
-        this.chartsData = data;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load chart data.';
         this.cdr.detectChanges();
       },
     });

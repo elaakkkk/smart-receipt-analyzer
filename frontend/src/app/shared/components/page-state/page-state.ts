@@ -8,7 +8,7 @@ import { Component, Input } from '@angular/core';
 })
 export class PageState {
   @Input({ required: true }) message = '';
-  @Input() type: 'info' | 'success' | 'error' |'loading' = 'info';
+  @Input() type: 'info' | 'success' | 'error' | 'loading' = 'info';
 
   get icon(): string {
     switch (this.type) {
