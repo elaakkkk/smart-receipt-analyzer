@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { finalize } from 'rxjs';
 
 import { ReceiptListItem } from '../../core/models/receipt.model';
 import { ReceiptService } from '../../core/services/receipt.service';
@@ -40,18 +41,22 @@ export class Receipts implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.receiptService.getReceipts().subscribe({
-      next: (data) => {
-        this.receipts = data;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load receipts.';
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.receiptService
+      .getReceipts()
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          this.receipts = data;
+        },
+        error: () => {
+          this.errorMessage = 'Unable to load receipts.';
+        },
+      });
   }
 
   onFileSelected(event: Event): void {
@@ -77,27 +82,25 @@ export class Receipts implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.receiptService.uploadReceipt(this.selectedFile).subscribe({
-      next: () => {
-        this.uploading = false;
-        this.selectedFile = null;
-        this.successMessage = 'Receipt uploaded successfully.';
-
-        this.loadReceipts();
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.uploading = false;
-        this.errorMessage = 'Unable to upload receipt.';
-
-        this.loadReceipts();
-        this.cdr.detectChanges();
-      },
-      complete: () => {
-        this.uploading = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.receiptService
+      .uploadReceipt(this.selectedFile)
+      .pipe(
+        finalize(() => {
+          this.uploading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.selectedFile = null;
+          this.successMessage = 'Receipt uploaded successfully.';
+          this.loadReceipts();
+        },
+        error: () => {
+          this.errorMessage = 'Unable to upload receipt.';
+          this.loadReceipts();
+        },
+      });
   }
 
   openDeleteModal(id: number): void {
@@ -123,28 +126,26 @@ export class Receipts implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.receiptService.deleteReceipt(id).subscribe({
-      next: () => {
-        this.deleting = false;
-        this.receipts = this.receipts.filter((receipt) => receipt.id !== id);
-        this.successMessage = 'Receipt deleted successfully.';
-        this.closeDeleteModal();
-
-        this.loadReceipts();
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.deleting = false;
-        this.errorMessage = 'Unable to delete the receipt.';
-        this.closeDeleteModal();
-
-        this.loadReceipts();
-        this.cdr.detectChanges();
-      },
-      complete: () => {
-        this.deleting = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.receiptService
+      .deleteReceipt(id)
+      .pipe(
+        finalize(() => {
+          this.deleting = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.receipts = this.receipts.filter((receipt) => receipt.id !== id);
+          this.successMessage = 'Receipt deleted successfully.';
+          this.closeDeleteModal();
+          this.loadReceipts();
+        },
+        error: () => {
+          this.errorMessage = 'Unable to delete the receipt.';
+          this.closeDeleteModal();
+          this.loadReceipts();
+        },
+      });
   }
 }
