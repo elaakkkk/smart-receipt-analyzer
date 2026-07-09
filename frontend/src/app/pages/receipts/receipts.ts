@@ -6,10 +6,11 @@ import { ReceiptListItem } from '../../core/models/receipt.model';
 import { ReceiptService } from '../../core/services/receipt.service';
 import { RouterLink } from '@angular/router';
 import { PageState } from '../../shared/components/page-state/page-state';
+import { ActionButton } from '../../shared/components/action-button/action-button';
 
 @Component({
   selector: 'app-receipts',
-  imports: [DatePipe, RouterLink, PageState],
+  imports: [DatePipe, RouterLink, PageState, ActionButton],
   templateUrl: './receipts.html',
   styleUrl: './receipts.css',
 })

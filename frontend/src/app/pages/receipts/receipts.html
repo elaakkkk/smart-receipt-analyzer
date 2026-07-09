@@ -49,14 +49,14 @@
           </span>
         </label>
 
-        <button
-          type="button"
-          class="upload-button"
-          [disabled]="uploading || !selectedFile"
-          (click)="uploadReceipt()"
-        >
-          {{ uploading ? 'Uploading...' : 'Upload receipt' }}
-        </button>
+        <app-action-button
+          label="Upload receipt"
+          variant="primary"
+          [loading]="uploading"
+          [disabled]="!selectedFile"
+          [fullWidth]="true"
+          (clicked)="uploadReceipt()"
+        />
       </div>
     </section>
 
@@ -138,13 +138,12 @@
                   View
                 </a>
 
-                <button
-                  type="button"
-                  class="delete-button"
-                  (click)="openDeleteModal(receipt.id)"
-                >
-                  Delete
-                </button>
+                <app-action-button
+                  label="Delete"
+                  variant="danger"
+                  size="sm"
+                  (clicked)="openDeleteModal(receipt.id)"
+                />
               </div>
             </article>
           }
@@ -170,23 +169,19 @@
         </p>
 
         <div class="modal-actions">
-          <button
-            type="button"
-            class="cancel-button"
-            (click)="closeDeleteModal()"
+          <app-action-button
+            label="Cancel"
+            variant="ghost"
             [disabled]="deleting"
-          >
-            Cancel
-          </button>
+            (clicked)="closeDeleteModal()"
+          />
 
-          <button
-            type="button"
-            class="confirm-delete-button"
-            (click)="confirmDelete()"
-            [disabled]="deleting"
-          >
-            {{ deleting ? 'Deleting...' : 'Delete receipt' }}
-          </button>
+          <app-action-button
+            label="Delete receipt"
+            variant="danger"
+            [loading]="deleting"
+            (clicked)="confirmDelete()"
+          />
         </div>
       </div>
     </div>

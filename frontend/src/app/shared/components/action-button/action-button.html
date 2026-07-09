@@ -1,0 +1,14 @@
+<button
+  [type]="type"
+  class="action-button"
+  [class.primary]="variant === 'primary'"
+  [class.secondary]="variant === 'secondary'"
+  [class.danger]="variant === 'danger'"
+  [class.ghost]="variant === 'ghost'"
+  [class.sm]="size === 'sm'"
+  [class.full-width]="fullWidth"
+  [disabled]="disabled || loading"
+  (click)="onClick()"
+>
+  {{ loading ? 'Loading...' : label }}
+</button>
