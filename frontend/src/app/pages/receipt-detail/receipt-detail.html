@@ -1,9 +1,15 @@
 <section class="detail-page">
   <div class="detail-container">
-    <a class="back-link" routerLink="/receipts">
-      <span>←</span>
-      Back to receipts
-    </a>
+    <div class="detail-actions">
+        <a class="back-link" routerLink="/receipts">
+            <span>←</span>
+            Back to receipts
+        </a>
+
+        <a class="dashboard-link" routerLink="/dashboard">
+            Dashboard
+        </a>
+        </div>
 
     @if (loading) {
     <app-page-state
