@@ -102,6 +102,17 @@
             <h2>Processed documents</h2>
             <p>Latest uploaded receipts and invoices from your backend.</p>
           </div>
+
+          <label class="search-box">
+            <span>Search</span>
+            <input
+              type="search"
+              name="searchTerm"
+              placeholder="Search by name, type, or format..."
+              [(ngModel)]="searchTerm"
+            />
+            <small>Search value: {{ searchTerm }}</small>
+          </label>
         </div>
 
         <div class="receipts-table">
@@ -112,7 +123,7 @@
             <span></span>
           </div>
 
-          @for (receipt of receipts; track receipt.id) {
+          @for (receipt of filteredReceipts; track receipt.id) {
             <article class="table-row">
               <div class="file-cell">
                 <div class="file-icon">
@@ -148,6 +159,11 @@
             </article>
           }
         </div>
+        @if (filteredReceipts.length === 0 && receipts.length > 0) {
+          <div class="empty-filter">
+            No document matches your search.
+          </div>
+        }
       </section>
     }
   </div>

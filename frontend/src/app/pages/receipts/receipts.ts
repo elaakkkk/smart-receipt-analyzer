@@ -7,10 +7,11 @@ import { ReceiptService } from '../../core/services/receipt.service';
 import { RouterLink } from '@angular/router';
 import { PageState } from '../../shared/components/page-state/page-state';
 import { ActionButton } from '../../shared/components/action-button/action-button';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-receipts',
-  imports: [DatePipe, RouterLink, PageState, ActionButton],
+  imports: [DatePipe, RouterLink, FormsModule, PageState, ActionButton],
   templateUrl: './receipts.html',
   styleUrl: './receipts.css',
 })
@@ -23,6 +24,8 @@ export class Receipts implements OnInit {
 
   errorMessage = '';
   successMessage = '';
+
+  searchTerm = '';
 
   selectedFile: File | null = null;
 
@@ -102,6 +105,28 @@ export class Receipts implements OnInit {
           this.loadReceipts();
         },
       });
+  }
+
+  get filteredReceipts(): ReceiptListItem[] {
+    const term = this.searchTerm.trim().toLowerCase();
+
+    if (!term) {
+      return this.receipts;
+    }
+
+    return this.receipts.filter((receipt) => {
+      const filename = receipt.original_filename?.toLowerCase() ?? '';
+      const contentType = receipt.content_type?.toLowerCase() ?? '';
+      const documentType = receipt.document_type?.toLowerCase() ?? 'unknown';
+      const createdAt = receipt.created_at?.toLowerCase() ?? '';
+
+      return [
+        filename,
+        contentType,
+        documentType,
+        createdAt,
+      ].some((value) => value.includes(term));
+    });
   }
 
   openDeleteModal(id: number): void {
