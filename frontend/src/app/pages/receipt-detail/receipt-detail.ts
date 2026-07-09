@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DatePipe, JsonPipe } from '@angular/common';
+import { finalize } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { ReceiptService } from '../../core/services/receipt.service';
@@ -45,17 +46,21 @@ export class ReceiptDetailComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.receiptService.getReceiptById(id).subscribe({
-      next: (data) => {
-        this.receipt = data;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load receipt.';
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-    });
+    this.receiptService
+      .getReceiptById(id)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          this.receipt = data;
+        },
+        error: () => {
+          this.errorMessage = 'Unable to load receipt.';
+        },
+      });
   }
 }
