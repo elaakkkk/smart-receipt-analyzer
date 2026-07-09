@@ -127,5 +127,62 @@
         </article>
       }
     </section>
+    @if (chartsData) {
+    <section class="charts-grid">
+      <article class="panel chart-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Document types</h2>
+            <p>Visual distribution of classified documents</p>
+          </div>
+        </div>
+
+        <div class="bar-chart">
+          @for (item of chartsData.document_types; track item.label) {
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </div>
+
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  [style.width.%]="(item.value / getMaxChartValue(chartsData.document_types)) * 100"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="panel chart-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Validation status</h2>
+            <p>Valid, invalid and warning-based validation results</p>
+          </div>
+        </div>
+
+        <div class="bar-chart">
+          @for (item of chartsData.validation_status; track item.label) {
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </div>
+
+              <div class="bar-track">
+                <div
+                  class="bar-fill secondary"
+                  [style.width.%]="(item.value / getMaxChartValue(chartsData.validation_status)) * 100"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+    </section>
+  }
   </div>
 </section>

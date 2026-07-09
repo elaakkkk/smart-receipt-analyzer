@@ -75,4 +75,12 @@ export class Dashboard implements OnInit{
       },
     });
   }
+
+  getMaxChartValue(items: { label: string; value: number }[]): number {
+    if (!items.length) {
+      return 1;
+    }
+
+    return Math.max(...items.map((item) => item.value), 1);
+  }
 }
