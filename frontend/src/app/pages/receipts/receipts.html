@@ -1,25 +1,39 @@
 <section class="receipts-page">
   <div class="receipts-container">
     <header class="receipts-hero">
-      <div>
-        <span class="eyebrow">Uploaded documents</span>
+      <div class="hero-content">
+        <span class="eyebrow">Document workspace</span>
+
         <h1>Receipts Library</h1>
+
         <p>
-          Browse uploaded receipts, review their classification status,
-          and manage processed documents.
+          Upload receipts and invoices, run OCR extraction, validate structured data,
+          and manage every processed document from one clean workspace.
         </p>
+
+        <div class="hero-meta">
+          <span>PDF</span>
+          <span>PNG</span>
+          <span>JPG</span>
+          <span>JPEG</span>
+        </div>
       </div>
 
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        {{ receipts.length }} documents
+      <div class="hero-card">
+        <span class="hero-card-label">Total documents</span>
+        <strong>{{ receipts.length }}</strong>
+        <p>Processed files in your library</p>
       </div>
     </header>
 
     <section class="upload-panel">
-      <div>
-        <h2>Upload a new receipt</h2>
-        <p>Accepted formats: PDF, PNG, JPG, JPEG.</p>
+      <div class="upload-copy">
+        <div class="upload-icon">↑</div>
+
+        <div>
+          <h2>Upload a new receipt</h2>
+          <p>Choose a PDF or image file and send it to the OCR pipeline.</p>
+        </div>
       </div>
 
       <div class="upload-actions">
@@ -29,6 +43,7 @@
             accept=".pdf,.png,.jpg,.jpeg"
             (change)="onFileSelected($event)"
           />
+
           <span>
             {{ selectedFile ? selectedFile.name : 'Choose file' }}
           </span>
@@ -47,53 +62,70 @@
 
     @if (successMessage) {
       <div class="state-card success">
+        <span>✓</span>
         {{ successMessage }}
       </div>
     }
 
     @if (loading) {
       <div class="state-card">
+        <span>⟳</span>
         Loading receipts...
       </div>
     }
 
     @if (errorMessage) {
       <div class="state-card error">
+        <span>!</span>
         {{ errorMessage }}
       </div>
     }
 
     @if (!loading && receipts.length === 0) {
-      <div class="empty-state">
+      <section class="empty-state">
+        <div class="empty-icon">⌁</div>
+
         <h2>No receipts uploaded yet</h2>
+
         <p>
-          Once you upload PDF or image receipts, they will appear here.
+          Upload your first receipt to test OCR extraction, document classification,
+          JSON validation, and database storage.
         </p>
-      </div>
+      </section>
     }
 
     @if (receipts.length > 0) {
       <section class="receipts-panel">
         <div class="panel-header">
           <div>
+            <span class="panel-kicker">Library</span>
             <h2>Processed documents</h2>
-            <p>Latest uploaded receipts and invoices</p>
+            <p>Latest uploaded receipts and invoices from your backend.</p>
           </div>
         </div>
 
         <div class="receipts-table">
           <div class="table-header">
-            <span>File name</span>
-            <span>Document type</span>
-            <span>Created at</span>
-            <span>Actions</span>
+            <span>File</span>
+            <span>Type</span>
+            <span>Created</span>
+            <span></span>
           </div>
 
           @for (receipt of receipts; track receipt.id) {
-            <div class="table-row">
-              <span class="filename">{{ receipt.original_filename }}</span>
+            <article class="table-row">
+              <div class="file-cell">
+                <div class="file-icon">
+                  {{ receipt.original_filename.toLowerCase().endsWith('.pdf') ? 'PDF' : 'IMG' }}
+                </div>
 
-              <span class="badge">
+                <div>
+                  <span class="filename">{{ receipt.original_filename }}</span>
+                  <small>{{ receipt.content_type }}</small>
+                </div>
+              </div>
+
+              <span class="type-badge" [class.unknown]="!receipt.document_type">
                 {{ receipt.document_type || 'Unknown' }}
               </span>
 
@@ -108,46 +140,49 @@
               >
                 Delete
               </button>
-            </div>
+            </article>
           }
         </div>
       </section>
     }
   </div>
-    @if (showDeleteModal) {
+
+  @if (showDeleteModal) {
     <div class="modal-backdrop">
-        <div class="confirm-modal">
+      <div class="confirm-modal">
         <div class="modal-icon">
-            !
+          !
         </div>
 
-        <h2>Delete receipt?</h2>
+        <span class="modal-kicker">Danger zone</span>
+
+        <h2>Delete this receipt?</h2>
 
         <p>
-            This action will remove the receipt from the database and delete the
-            uploaded file from local storage.
+          This action will remove the database record and delete the uploaded file
+          from local storage. This cannot be undone.
         </p>
 
         <div class="modal-actions">
-            <button
+          <button
             type="button"
             class="cancel-button"
             (click)="closeDeleteModal()"
             [disabled]="deleting"
-            >
+          >
             Cancel
-            </button>
+          </button>
 
-            <button
+          <button
             type="button"
             class="confirm-delete-button"
             (click)="confirmDelete()"
             [disabled]="deleting"
-            >
+          >
             {{ deleting ? 'Deleting...' : 'Delete receipt' }}
-            </button>
+          </button>
         </div>
-        </div>
+      </div>
     </div>
-    }
+  }
 </section>
