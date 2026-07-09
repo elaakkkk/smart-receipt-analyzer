@@ -1,0 +1,27 @@
+<article class="panel chart-panel">
+  <div class="panel-header">
+    <div>
+      <h2>{{ title }}</h2>
+      <p>{{ description }}</p>
+    </div>
+  </div>
+
+  <div class="bar-chart">
+    @for (item of items; track item.label) {
+      <div class="bar-row">
+        <div class="bar-label">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.value }}</strong>
+        </div>
+
+        <div class="bar-track">
+          <div
+            class="bar-fill"
+            [class.secondary]="variant === 'secondary'"
+            [style.width.%]="(item.value / getMaxChartValue()) * 100"
+          ></div>
+        </div>
+      </div>
+    }
+  </div>
+</article>

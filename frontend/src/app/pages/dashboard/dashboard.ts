@@ -2,10 +2,11 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { AnalyticsCharts, AnalyticsSummary, DocumentTypesStats, ValidationStats } from '../../core/models/analytics.model';
 import { RouterLink } from '@angular/router';
+import { BarChart } from '../../shared/components/bar-chart/bar-chart';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, BarChart],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -74,13 +75,5 @@ export class Dashboard implements OnInit{
         this.cdr.detectChanges();
       },
     });
-  }
-
-  getMaxChartValue(items: { label: string; value: number }[]): number {
-    if (!items.length) {
-      return 1;
-    }
-
-    return Math.max(...items.map((item) => item.value), 1);
   }
 }
