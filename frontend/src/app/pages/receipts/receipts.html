@@ -133,13 +133,19 @@
                 {{ receipt.created_at | date:'medium' }}
               </span>
 
-              <button
-                type="button"
-                class="delete-button"
-                (click)="openDeleteModal(receipt.id)"
-              >
-                Delete
-              </button>
+              <div class="row-actions">
+                <a class="view-button" [routerLink]="['/receipts', receipt.id]">
+                  View
+                </a>
+
+                <button
+                  type="button"
+                  class="delete-button"
+                  (click)="openDeleteModal(receipt.id)"
+                >
+                  Delete
+                </button>
+              </div>
             </article>
           }
         </div>

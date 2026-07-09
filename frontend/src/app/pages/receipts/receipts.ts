@@ -3,10 +3,11 @@ import { DatePipe } from '@angular/common';
 
 import { ReceiptListItem } from '../../core/models/receipt.model';
 import { ReceiptService } from '../../core/services/receipt.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-receipts',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   templateUrl: './receipts.html',
   styleUrl: './receipts.css',
 })

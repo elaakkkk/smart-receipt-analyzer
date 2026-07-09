@@ -1,0 +1,158 @@
+<section class="detail-page">
+  <div class="detail-container">
+    <a class="back-link" routerLink="/receipts">
+      <span>←</span>
+      Back to receipts
+    </a>
+
+    @if (loading) {
+      <div class="state-card">
+        <span>⟳</span>
+        Loading receipt details...
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="state-card error">
+        <span>!</span>
+        {{ errorMessage }}
+      </div>
+    }
+
+    @if (receipt) {
+      <header class="detail-hero">
+        <div class="hero-main">
+          <span class="eyebrow">Receipt analysis</span>
+
+          <h1>{{ receipt.original_filename }}</h1>
+
+          <p>
+            Review the complete processing result: OCR text, document classification,
+            structured JSON extraction, and validation feedback.
+          </p>
+
+          <div class="hero-tags">
+            <span>{{ receipt.content_type }}</span>
+            <span>{{ receipt.created_at | date:'medium' }}</span>
+            <span>{{ receipt.document_type || 'Unknown' }}</span>
+          </div>
+        </div>
+
+        <div class="status-card">
+          <span class="status-label">Validation status</span>
+
+          <strong [class.valid]="receipt.validation_result?.is_valid">
+            {{ receipt.validation_result?.is_valid ? 'Valid' : 'Invalid' }}
+          </strong>
+
+          <p>
+            {{ receipt.validation_result?.errors?.length || 0 }} errors ·
+            {{ receipt.validation_result?.warnings?.length || 0 }} warnings
+          </p>
+        </div>
+      </header>
+
+      <section class="metadata-grid">
+        <article class="meta-card">
+          <span>Document ID</span>
+          <strong>#{{ receipt.id }}</strong>
+        </article>
+
+        <article class="meta-card">
+          <span>Document type</span>
+          <strong>{{ receipt.document_type || 'Unknown' }}</strong>
+        </article>
+
+        <article class="meta-card">
+          <span>Content type</span>
+          <strong>{{ receipt.content_type }}</strong>
+        </article>
+
+        <article class="meta-card">
+          <span>Created at</span>
+          <strong>{{ receipt.created_at | date:'short' }}</strong>
+        </article>
+      </section>
+
+      <section class="analysis-grid">
+        <article class="panel ocr-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">OCR output</span>
+              <h2>Extracted text</h2>
+            </div>
+
+            <span class="panel-chip">Raw text</span>
+          </div>
+
+          <pre>{{ receipt.extracted_text || 'No extracted text available.' }}</pre>
+        </article>
+
+        <article class="panel json-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Structured data</span>
+              <h2>Extracted JSON</h2>
+            </div>
+
+            <span class="panel-chip">JSON</span>
+          </div>
+
+          <pre>{{ receipt.structured_data | json }}</pre>
+        </article>
+
+        <article class="panel validation-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Business rules</span>
+              <h2>Validation feedback</h2>
+            </div>
+
+            <span
+              class="validation-pill"
+              [class.valid]="receipt.validation_result?.is_valid"
+            >
+              {{ receipt.validation_result?.is_valid ? 'Valid' : 'Invalid' }}
+            </span>
+          </div>
+
+          <div class="feedback-grid">
+            <div class="feedback-box errors">
+              <div class="feedback-title">
+                <span>!</span>
+                <h3>Errors</h3>
+              </div>
+
+              @if (receipt.validation_result?.errors?.length) {
+                <ul>
+                  @for (error of receipt.validation_result?.errors; track error) {
+                    <li>{{ error }}</li>
+                  }
+                </ul>
+              } @else {
+                <p>No errors detected.</p>
+              }
+            </div>
+
+            <div class="feedback-box warnings">
+              <div class="feedback-title">
+                <span>⚠</span>
+                <h3>Warnings</h3>
+              </div>
+
+              @if (receipt.validation_result?.warnings?.length) {
+                <ul>
+                  @for (warning of receipt.validation_result?.warnings; track warning) {
+                    <li>{{ warning }}</li>
+                  }
+                </ul>
+              } @else {
+                <p>No warnings detected.</p>
+              }
+            </div>
+          </div>
+        </article>
+      </section>
+    }
+  </div>
+</section>
