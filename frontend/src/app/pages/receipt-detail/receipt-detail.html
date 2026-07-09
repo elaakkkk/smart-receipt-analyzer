@@ -6,17 +6,17 @@
     </a>
 
     @if (loading) {
-      <div class="state-card">
-        <span>⟳</span>
-        Loading receipt details...
-      </div>
+    <app-page-state
+        type="loading"
+        message="Loading receipt details..."
+    />
     }
 
     @if (errorMessage) {
-      <div class="state-card error">
-        <span>!</span>
-        {{ errorMessage }}
-      </div>
+    <app-page-state
+        type="error"
+        [message]="errorMessage"
+    />
     }
 
     @if (receipt) {

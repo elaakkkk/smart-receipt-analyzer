@@ -344,25 +344,6 @@ li {
   font-weight: 700;
 }
 
-.state-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 16px 18px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary-dark);
-  border: 1px solid rgba(37, 99, 235, 0.16);
-  border-radius: var(--radius-md);
-  font-weight: 900;
-}
-
-.state-card.error {
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
-  border-color: rgba(220, 38, 38, 0.16);
-}
-
 @media (max-width: 980px) {
   .detail-hero {
     grid-template-columns: 1fr;

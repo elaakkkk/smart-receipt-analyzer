@@ -26,15 +26,17 @@
     </header>
 
     @if (loading) {
-      <div class="state-card">
-        Loading dashboard data...
-      </div>
+      <app-page-state
+        type="loading"
+        message="Loading dashboard data..."
+      />
     }
 
     @if (errorMessage) {
-      <div class="state-card error">
-        {{ errorMessage }}
-      </div>
+      <app-page-state
+        type="error"
+        [message]="errorMessage"
+      />
     }
 
     @if (summary) {

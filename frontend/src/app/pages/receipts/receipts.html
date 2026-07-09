@@ -61,24 +61,24 @@
     </section>
 
     @if (successMessage) {
-      <div class="state-card success">
-        <span>✓</span>
-        {{ successMessage }}
-      </div>
+      <app-page-state
+        type="success"
+        [message]="successMessage"
+      />
     }
 
     @if (loading) {
-      <div class="state-card">
-        <span>⟳</span>
-        Loading receipts...
-      </div>
+      <app-page-state
+        type="loading"
+        message="Loading receipts..."
+      />
     }
 
     @if (errorMessage) {
-      <div class="state-card error">
-        <span>!</span>
-        {{ errorMessage }}
-      </div>
+      <app-page-state
+        type="error"
+        [message]="errorMessage"
+      />
     }
 
     @if (!loading && receipts.length === 0) {

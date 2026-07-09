@@ -4,10 +4,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { ReceiptService } from '../../core/services/receipt.service';
 import { ReceiptDetail as ReceiptDetailModel } from '../../core/models/receipt.model';
+import { PageState } from '../../shared/components/page-state/page-state';
 
 @Component({
   selector: 'app-receipt-detail',
-  imports: [DatePipe, JsonPipe, RouterLink],
+  imports: [DatePipe, JsonPipe, RouterLink, PageState],
   templateUrl: './receipt-detail.html',
   styleUrl: './receipt-detail.css',
 })

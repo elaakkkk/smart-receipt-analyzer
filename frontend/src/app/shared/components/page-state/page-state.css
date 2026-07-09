@@ -1,0 +1,46 @@
+.state-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: var(--radius-md);
+  font-weight: 900;
+}
+
+.state-card span {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.state-card.success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  border-color: rgba(22, 163, 74, 0.16);
+}
+
+.state-card.error {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-color: rgba(220, 38, 38, 0.16);
+}
+
+.state-card.loading {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}
+
+.state-card.info {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}

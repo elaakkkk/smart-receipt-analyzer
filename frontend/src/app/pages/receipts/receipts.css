@@ -238,31 +238,6 @@
   cursor: not-allowed;
 }
 
-.state-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 16px 18px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary-dark);
-  border: 1px solid rgba(37, 99, 235, 0.16);
-  border-radius: var(--radius-md);
-  font-weight: 800;
-}
-
-.state-card.success {
-  background: var(--color-success-soft);
-  color: var(--color-success);
-  border-color: rgba(22, 163, 74, 0.16);
-}
-
-.state-card.error {
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
-  border-color: rgba(220, 38, 38, 0.16);
-}
-
 .empty-state,
 .receipts-panel {
   padding: 30px;
