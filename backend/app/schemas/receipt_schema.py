@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 
 class ExtractedReceiptData(BaseModel):
-    merchant_name: str
+    merchant_name: str | None = None
     purchase_date: str | None = None
     total_amount: float | None = None
     currency: str | None = "EUR"
