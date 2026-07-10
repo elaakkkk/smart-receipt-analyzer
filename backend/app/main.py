@@ -9,8 +9,8 @@ from app.api.routes.analytics import router as analytics_router
 
 Base.metadata.create_all(bind=engine)
 allowed_origin = [
-    "http://localhost:4200",
-    "http://127.0.0.1:4200"
+    "http://localhost:4300",
+    "http://127.0.0.1:4300"
 ]
 
 app = FastAPI(
