@@ -150,6 +150,27 @@
                 </button>
               </div>
             </div>
+            <div class="sort-filter">
+              <span>Sort</span>
+
+              <div class="type-options">
+                <button
+                  type="button"
+                  [class.active]="sortOrder === 'newest'"
+                  (click)="sortOrder = 'newest'"
+                >
+                  Newest
+                </button>
+
+                <button
+                  type="button"
+                  [class.active]="sortOrder === 'oldest'"
+                  (click)="sortOrder = 'oldest'"
+                >
+                  Oldest
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

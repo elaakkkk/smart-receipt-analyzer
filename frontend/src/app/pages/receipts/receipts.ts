@@ -27,6 +27,7 @@ export class Receipts implements OnInit {
 
   searchTerm = '';
   selectedDocumentType = 'all';
+  sortOrder: 'newest' | 'oldest' = 'newest';
 
   selectedFile: File | null = null;
 
@@ -111,7 +112,7 @@ export class Receipts implements OnInit {
   get filteredReceipts(): ReceiptListItem[] {
     const term = this.searchTerm.trim().toLowerCase();
 
-    return this.receipts.filter((receipt) => {
+    const filtered = this.receipts.filter((receipt) => {
       const filename = receipt.original_filename.toLowerCase();
       const contentType = receipt.content_type.toLowerCase();
       const documentType = receipt.document_type?.toLowerCase() ?? 'unknown';
@@ -127,6 +128,15 @@ export class Receipts implements OnInit {
         documentType === this.selectedDocumentType;
 
       return matchesSearch && matchesType;
+    });
+
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+
+      return this.sortOrder === 'newest'
+        ? dateB - dateA
+        : dateA - dateB;
     });
   }
 

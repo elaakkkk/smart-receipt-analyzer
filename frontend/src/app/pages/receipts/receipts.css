@@ -556,7 +556,8 @@
 }
 
 .search-box,
-.type-filter {
+.type-filter,
+.sort-filter  {
   display: grid;
   gap: 8px;
 }
@@ -566,7 +567,8 @@
 }
 
 .search-box span,
-.type-filter > span {
+.type-filter > span,
+.sort-filter > span {
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 900;
