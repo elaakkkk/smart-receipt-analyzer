@@ -103,15 +103,54 @@
             <p>Latest uploaded receipts and invoices from your backend.</p>
           </div>
 
-          <label class="search-box">
-            <span>Search</span>
-            <input
-              type="search"
-              name="searchTerm"
-              placeholder="Search by name, type, or format..."
-              [(ngModel)]="searchTerm"
-            />
-          </label>
+          <div class="filters">
+            <label class="search-box">
+              <span>Search</span>
+              <input
+                type="search"
+                placeholder="Search by name, type, or format..."
+                [(ngModel)]="searchTerm"
+              />
+            </label>
+
+            <div class="type-filter">
+              <span>Type</span>
+
+              <div class="type-options">
+                <button
+                  type="button"
+                  [class.active]="selectedDocumentType === 'all'"
+                  (click)="selectedDocumentType = 'all'"
+                >
+                  All
+                </button>
+
+                <button
+                  type="button"
+                  [class.active]="selectedDocumentType === 'receipt'"
+                  (click)="selectedDocumentType = 'receipt'"
+                >
+                  Receipt
+                </button>
+
+                <button
+                  type="button"
+                  [class.active]="selectedDocumentType === 'invoice'"
+                  (click)="selectedDocumentType = 'invoice'"
+                >
+                  Invoice
+                </button>
+
+                <button
+                  type="button"
+                  [class.active]="selectedDocumentType === 'unknown'"
+                  (click)="selectedDocumentType = 'unknown'"
+                >
+                  Unknown
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="receipts-table">
@@ -160,7 +199,7 @@
         </div>
         @if (filteredReceipts.length === 0 && receipts.length > 0) {
           <div class="empty-filter">
-            No document matches your search.
+            No document matches your current filters.
           </div>
         }
       </section>

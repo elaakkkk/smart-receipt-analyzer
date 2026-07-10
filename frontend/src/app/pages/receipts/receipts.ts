@@ -26,6 +26,7 @@ export class Receipts implements OnInit {
   successMessage = '';
 
   searchTerm = '';
+  selectedDocumentType = 'all';
 
   selectedFile: File | null = null;
 
@@ -110,22 +111,22 @@ export class Receipts implements OnInit {
   get filteredReceipts(): ReceiptListItem[] {
     const term = this.searchTerm.trim().toLowerCase();
 
-    if (!term) {
-      return this.receipts;
-    }
-
     return this.receipts.filter((receipt) => {
-      const filename = receipt.original_filename?.toLowerCase() ?? '';
-      const contentType = receipt.content_type?.toLowerCase() ?? '';
+      const filename = receipt.original_filename.toLowerCase();
+      const contentType = receipt.content_type.toLowerCase();
       const documentType = receipt.document_type?.toLowerCase() ?? 'unknown';
-      const createdAt = receipt.created_at?.toLowerCase() ?? '';
 
-      return [
-        filename,
-        contentType,
-        documentType,
-        createdAt,
-      ].some((value) => value.includes(term));
+      const matchesSearch =
+        !term ||
+        filename.includes(term) ||
+        contentType.includes(term) ||
+        documentType.includes(term);
+
+      const matchesType =
+        this.selectedDocumentType === 'all' ||
+        documentType === this.selectedDocumentType;
+
+      return matchesSearch && matchesType;
     });
   }
 
