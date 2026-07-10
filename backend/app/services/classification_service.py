@@ -1,17 +1,53 @@
 def classify_document(text: str) -> str:
     """
-    Classifies the document based on its text content.
-
-    Args:
-        text (str): The text extracted from the document.
-
-    Returns:
-        str: The classification label for the document.
+    Classify a document as receipt, invoice, or unknown using keyword scoring.
     """
-    # Placeholder logic for classification
-    if "facture" in text.lower() or "invoice" in text.lower():
-        return "invoice"
-    elif "total" in text.lower() or "receipt" in text.lower():
+    normalized_text = text.lower()
+
+    receipt_score = calculate_score(
+        normalized_text,
+        [
+            "ticket de vente",
+            "ticket client",
+            "ticket de caisse",
+            "a payer",
+            "à payer",
+            "carte bancaire",
+            "sans contact",
+            "nombre de lignes",
+            "merci de votre visite",
+            "total promotion",
+            "lidl plus",
+            "cb",
+        ],
+    )
+
+    invoice_score = calculate_score(
+        normalized_text,
+        [
+            "facture",
+            "invoice",
+            "numéro de facture",
+            "numero de facture",
+            "invoice number",
+            "date de facture",
+            "billing address",
+            "adresse de facturation",
+            "tva intracommunautaire",
+            "conditions de paiement",
+            "montant ht",
+            "montant ttc",
+        ],
+    )
+
+    if receipt_score >= 2 and receipt_score >= invoice_score:
         return "receipt"
-    else:
-        return "unknown"
+
+    if invoice_score >= 2 and invoice_score > receipt_score:
+        return "invoice"
+
+    return "unknown"
+
+
+def calculate_score(text: str, keywords: list[str]) -> int:
+    return sum(1 for keyword in keywords if keyword in text)
