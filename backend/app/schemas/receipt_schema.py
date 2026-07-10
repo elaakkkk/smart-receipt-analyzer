@@ -6,6 +6,7 @@ class ReceiptItem(BaseModel):
     unit_price: float | None = None
     quantity: float | None = None
     total_price: float | None = None
+    category: str | None = None
 
 class ExtractedReceiptData(BaseModel):
     merchant_name: str | None = None
@@ -32,7 +33,7 @@ class ReceiptDetail(ReceiptListItem):
     extracted_text: str | None
     structured_data: ExtractedReceiptData | None   
     validation_result: ValidationResult | None
-    
+
 class DeleteReceiptResponse(BaseModel):
     receipt_id: int
     message: str

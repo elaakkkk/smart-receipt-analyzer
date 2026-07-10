@@ -1,0 +1,106 @@
+def categorize_item(item_name: str) -> str:
+    normalized_name = item_name.lower()
+
+    category_keywords = {
+        "protein": [
+            "poulet",
+            "chicken",
+            "dinde",
+            "turkey",
+            "boeuf",
+            "bœuf",
+            "steak",
+            "thon",
+            "saumon",
+            "jambon",
+            "oeuf",
+            "œuf",
+            "tofu",
+        ],
+        "vegetable_herb": [
+            "salade",
+            "tomate",
+            "concombre",
+            "carotte",
+            "brocoli",
+            "courgette",
+            "poivron",
+            "oignon",
+            "aneth",
+            "persil",
+            "basilic",
+            "menthe",
+        ],
+        "fruit": [
+            "pomme",
+            "banane",
+            "orange",
+            "fraise",
+            "raisin",
+            "kiwi",
+            "citron",
+            "poire",
+        ],
+        "carbohydrate": [
+            "spaghetti",
+            "pâtes",
+            "pates",
+            "riz",
+            "pain",
+            "baguette",
+            "semoule",
+            "couscous",
+            "pomme de terre",
+            "potato",
+        ],
+        "dairy": [
+            "lait",
+            "yaourt",
+            "yogurt",
+            "fromage",
+            "beurre",
+            "crème",
+            "creme",
+        ],
+        "prepared_food": [
+            "pizza",
+            "sandwich",
+            "quiche",
+            "lasagne",
+            "burger",
+            "wrap",
+        ],
+        "snack_sweet": [
+            "chocolat",
+            "biscuit",
+            "cookie",
+            "bonbon",
+            "chips",
+            "gâteau",
+            "gateau",
+        ],
+        "beverage": [
+            "eau",
+            "jus",
+            "soda",
+            "café",
+            "cafe",
+            "thé",
+            "the",
+        ],
+        "household": [
+            "lessive",
+            "papier",
+            "sopalin",
+            "mouchoir",
+            "savon",
+            "shampoing",
+            "gel douche",
+        ],
+    }
+
+    for category, keywords in category_keywords.items():
+        if any(keyword in normalized_name for keyword in keywords):
+            return category
+
+    return "other"

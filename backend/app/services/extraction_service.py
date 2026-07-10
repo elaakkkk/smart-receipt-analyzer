@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+from app.services.item_categorization_service import categorize_item
 from app.schemas.receipt_schema import ExtractedReceiptData
 
 
@@ -242,6 +243,7 @@ def extract_items(text: str) -> list[dict]:
                 "unit_price": unit_price,
                 "quantity": quantity,
                 "total_price": total_price,
+                "category": categorize_item(name)
             }
         )
 
