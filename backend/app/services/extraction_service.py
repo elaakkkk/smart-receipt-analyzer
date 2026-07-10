@@ -17,7 +17,7 @@ def extract_structured_data(
         "purchase_date": extract_purchase_date(extracted_text),
         "total_amount": extract_total_amount(extracted_text),
         "currency": extract_currency(extracted_text),
-        "items": [],
+        "items": extract_items(extracted_text),
     }
 
     return ExtractedReceiptData(**structured_data)
@@ -153,3 +153,134 @@ def normalize_ocr_text(text: str) -> str:
         .replace("a payer\n", "a payer ")
         .replace("à payer\n", "à payer ")
     )
+
+def extract_items(text: str) -> list[dict]:
+    normalized_text = normalize_ocr_text(text)
+    lines = get_clean_lines(normalized_text)
+
+    items = []
+
+    ignored_keywords = [
+        "ticket",
+        "article",
+        "nombre de lignes",
+        "reduction",
+        "réduction",
+        "lidl plus",
+        "a payer",
+        "total",
+        "carte",
+        "tva",
+        "montant",
+        "siret",
+        "code ape",
+        "merci",
+        "garantie",
+        "factures",
+        "coupon",
+        "coupons",
+        "points",
+        "achat effectué",
+        "supermarché",
+        "supermarche",
+    ]
+
+    stop_keywords = [
+        "nombre de lignes",
+        "a payer",
+        "total eligible",
+        "total éligible",
+        "carte",
+        "va taux",
+        "taux mont",
+        "total promotion",
+        "avec lidl plus",
+        "siret",
+    ]
+
+    item_pattern = re.compile(
+        r"^(?P<name>.+?)\s+"
+        r"(?P<unit_price>\d+[,.]\d{2})\s+"
+        r"(?P<quantity>\d+(?:[,.]\d+)?)\s+"
+        r"(?P<total_price>\d+[,.]\d{2})"
+    )
+
+    for line in lines:
+        lower_line = line.lower()
+
+        if any(keyword in lower_line for keyword in stop_keywords):
+            break
+
+        if any(keyword in lower_line for keyword in ignored_keywords):
+            continue
+
+        if is_tax_line(line):
+            continue
+
+        match = item_pattern.search(line)
+
+        if not match:
+            continue
+
+        name = match.group("name").strip()
+        unit_price = parse_amount(match.group("unit_price"))
+        quantity = parse_quantity(match.group("quantity"))
+        total_price = parse_amount(match.group("total_price"))
+
+        unit_price, total_price = fix_item_prices(
+            unit_price=unit_price,
+            quantity=quantity,
+            total_price=total_price,
+        )
+
+        if not name or total_price is None:
+            continue
+
+        items.append(
+            {
+                "name": name,
+                "unit_price": unit_price,
+                "quantity": quantity,
+                "total_price": total_price,
+            }
+        )
+
+    return items
+
+def parse_quantity(value: str) -> float | None:
+    try:
+        return float(value.replace(",", "."))
+    except ValueError:
+        return None
+
+def is_tax_line(line: str) -> bool:
+    return bool(
+        re.match(
+            r"^[A-Z]\s+\d+[,.]\d+%\s+\d+[,.]\d{2}\s+\d+[,.]\d{2}\s+\d+[,.]\d{2}",
+            line.strip()
+        )
+    )
+
+def fix_item_prices(
+    unit_price: float | None,
+    quantity: float | None,
+    total_price: float | None
+) -> tuple[float | None, float | None]:
+    if unit_price is None or quantity is None or total_price is None:
+        return unit_price, total_price
+
+    expected_total = round(unit_price * quantity, 2)
+
+    if expected_total == total_price:
+        return unit_price, total_price
+
+    if quantity == 1 and unit_price != total_price:
+        unit_price = total_price
+        return unit_price, total_price
+
+    corrected_unit_price = round(total_price / quantity, 2)
+
+    if corrected_unit_price > 0:
+        unit_price = corrected_unit_price
+
+    return unit_price, total_price
