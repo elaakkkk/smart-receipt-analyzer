@@ -140,6 +140,21 @@ export class Receipts implements OnInit {
     });
   }
 
+  get resultsLabel(): string {
+    const total = this.receipts.length;
+    const shown = this.filteredReceipts.length;
+
+    if (total === 0) {
+      return 'No documents yet';
+    }
+
+    if (shown === total) {
+      return `${total} document${total > 1 ? 's' : ''}`;
+    }
+
+    return `Showing ${shown} of ${total} documents`;
+  }
+
   openDeleteModal(id: number): void {
     this.receiptIdToDelete = id;
     this.showDeleteModal = true;
