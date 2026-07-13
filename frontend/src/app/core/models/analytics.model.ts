@@ -52,3 +52,26 @@ export interface CategorySpendingItem {
   category: string;
   total_spent: number;
 }
+
+export interface AnalyticsKpis {
+  total_spent: number;
+  receipt_count: number;
+  average_basket: number;
+  top_merchant: string | null;
+  top_category: string | null;
+}
+
+export interface TopProductInsightItem {
+  product_name: string;
+  category: string | null;
+  total_spent: number;
+  quantity: number;
+}
+
+export interface AnalyticsInsightsResponse {
+  kpis: AnalyticsKpis;
+  monthly_spending: MonthlySpendingItem[];
+  merchant_spending: MerchantSpendingItem[];
+  category_spending: CategorySpendingItem[];
+  top_products: TopProductInsightItem[];
+}

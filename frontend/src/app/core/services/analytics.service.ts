@@ -12,6 +12,7 @@ import {
   MonthlySpendingItem,
   TopProductItem,
   ValidationStats,
+  AnalyticsInsightsResponse,
 } from '../models/analytics.model';
 
 @Injectable({
@@ -67,6 +68,26 @@ export class AnalyticsService {
   getCategorySpending(): Observable<CategorySpendingItem[]> {
     return this.http.get<CategorySpendingItem[]>(
       `${this.baseUrl}/api/analytics/category-spending`
+    );
+  }
+
+  getInsights(params: {
+    period?: string;
+    date_from?: string;
+    date_to?: string;
+    merchant?: string;
+    category?: string;
+  }): Observable<AnalyticsInsightsResponse> {
+    const queryParams = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        queryParams.set(key, value);
+      }
+    });
+
+    return this.http.get<AnalyticsInsightsResponse>(
+      `${this.baseUrl}/api/analytics/insights?${queryParams.toString()}`
     );
   }
 }

@@ -1,12 +1,12 @@
 <section class="analytics-page">
   <div class="analytics-container">
     <header class="analytics-hero">
-      <div>
+      <div class="hero-content">
         <span class="eyebrow">Data analysis</span>
         <h1>Receipt intelligence</h1>
         <p>
-          Explore spending behavior by month, merchant, category, and product
-          from your extracted receipts.
+          Analyze your extracted receipts by period, merchant, category, product,
+          and monthly spending trends.
         </p>
       </div>
 
@@ -14,6 +14,175 @@
         Refresh data
       </button>
     </header>
+
+    <section class="filters-shell">
+    <div class="filters-summary">
+        <div class="filters-summary-left">
+        <button
+            class="filter-toggle"
+            type="button"
+            (click)="toggleFilters()"
+            [class.open]="showFilters"
+        >
+            <span class="filter-icon">⌘</span>
+            <span>Filters</span>
+
+            @if (activeFiltersCount > 0) {
+            <b>{{ activeFiltersCount }}</b>
+            }
+        </button>
+
+        <div class="active-filter-pills">
+            <span>{{ selectedPeriodLabel }}</span>
+
+            @if (selectedMerchant) {
+            <span>{{ selectedMerchant }}</span>
+            }
+
+            @if (selectedCategory) {
+            <span>{{ formatLabel(selectedCategory) }}</span>
+            }
+
+            @if (selectedPeriod === 'custom' && dateFrom && dateTo) {
+            <span>{{ dateFrom }} → {{ dateTo }}</span>
+            }
+        </div>
+        </div>
+
+        <button class="reset-compact" type="button" (click)="resetFilters()">
+        Reset
+        </button>
+    </div>
+
+    @if (showFilters) {
+        <div class="filter-drawer">
+        <div class="filter-drawer-header">
+            <div>
+            <span class="panel-kicker">Analysis controls</span>
+            <h2>Refine your data</h2>
+            </div>
+
+            <button class="close-filter" type="button" (click)="toggleFilters()">
+            Close
+            </button>
+        </div>
+
+        <div class="quick-periods">
+            <button
+            type="button"
+            [class.active]="selectedPeriod === 'all'"
+            (click)="selectedPeriod = 'all'; loadAnalytics()"
+            >
+            All time
+            </button>
+
+            <button
+            type="button"
+            [class.active]="selectedPeriod === 'today'"
+            (click)="selectedPeriod = 'today'; loadAnalytics()"
+            >
+            Today
+            </button>
+
+            <button
+            type="button"
+            [class.active]="selectedPeriod === 'this_month'"
+            (click)="selectedPeriod = 'this_month'; loadAnalytics()"
+            >
+            This month
+            </button>
+
+            <button
+            type="button"
+            [class.active]="selectedPeriod === 'custom'"
+            (click)="selectedPeriod = 'custom'"
+            >
+            Custom
+            </button>
+        </div>
+
+        @if (selectedPeriod === 'custom') {
+            <div class="custom-date-grid">
+            <label class="filter-field compact">
+                <span>From</span>
+                <input
+                type="date"
+                [(ngModel)]="dateFrom"
+                (change)="loadAnalytics()"
+                />
+            </label>
+
+            <label class="filter-field compact">
+                <span>To</span>
+                <input
+                type="date"
+                [(ngModel)]="dateTo"
+                (change)="loadAnalytics()"
+                />
+            </label>
+            </div>
+        }
+
+        <div class="filter-columns">
+            <div class="filter-group">
+            <div class="filter-group-title">
+                <strong>Merchant</strong>
+                <span>{{ selectedMerchant || 'All merchants' }}</span>
+            </div>
+
+            <div class="option-list">
+                <button
+                type="button"
+                [class.active]="selectedMerchant === ''"
+                (click)="selectedMerchant = ''; loadAnalytics()"
+                >
+                All merchants
+                </button>
+
+                @for (merchant of merchantOptions; track merchant) {
+                <button
+                    type="button"
+                    [class.active]="selectedMerchant === merchant"
+                    (click)="selectedMerchant = merchant; loadAnalytics()"
+                >
+                    {{ merchant }}
+                </button>
+                }
+            </div>
+            </div>
+
+            <div class="filter-group">
+            <div class="filter-group-title">
+                <strong>Category</strong>
+                <span>
+                {{ selectedCategory ? formatLabel(selectedCategory) : 'All categories' }}
+                </span>
+            </div>
+
+            <div class="option-list">
+                <button
+                type="button"
+                [class.active]="selectedCategory === ''"
+                (click)="selectedCategory = ''; loadAnalytics()"
+                >
+                All categories
+                </button>
+
+                @for (category of categoryOptions; track category) {
+                <button
+                    type="button"
+                    [class.active]="selectedCategory === category"
+                    (click)="selectedCategory = category; loadAnalytics()"
+                >
+                    {{ formatLabel(category) }}
+                </button>
+                }
+            </div>
+            </div>
+        </div>
+        </div>
+    }
+    </section>
 
     @if (loading) {
       <app-page-state
@@ -29,18 +198,18 @@
       />
     }
 
-    @if (!loading && !errorMessage) {
+    @if (!loading && !errorMessage && activeFiltersCount > 0) {
       <section class="kpi-grid">
         <article class="kpi-card primary">
           <span>Total spent</span>
           <strong>{{ totalSpent | number:'1.2-2' }} EUR</strong>
-          <p>Across all analyzed receipts</p>
+          <p>Across the selected receipts</p>
         </article>
 
         <article class="kpi-card">
           <span>Receipts</span>
           <strong>{{ receiptsCount }}</strong>
-          <p>Total documents included</p>
+          <p>Documents included in this analysis</p>
         </article>
 
         <article class="kpi-card">
@@ -56,127 +225,178 @@
         </article>
       </section>
 
-      <section class="main-insight">
-        <div class="main-insight-content">
+      <section class="insight-banner">
+        <div>
           <span class="eyebrow">Top category</span>
           <h2>{{ topCategory }}</h2>
           <p>
-            This category currently represents the highest spending amount
-            across extracted receipt items.
+            This category currently represents the highest extracted spending
+            for the selected period.
           </p>
         </div>
 
-        <div class="main-insight-number">
+        <div class="insight-amount">
           {{ categorySpending[0]?.total_spent || 0 | number:'1.2-2' }} EUR
         </div>
       </section>
 
       <section class="analytics-grid">
-        <article class="analytics-panel wide">
-          <div class="panel-header">
+        <article class="analytics-card wide">
+          <div class="card-header">
             <div>
-              <span class="panel-kicker">Monthly trend</span>
+              <span class="panel-kicker">Trend</span>
               <h2>Spending by month</h2>
             </div>
           </div>
 
-          <div class="bar-list monthly">
-            @for (month of monthlySpending; track month.month) {
-              <div class="bar-row">
-                <div class="bar-info">
-                  <strong>{{ month.month }}</strong>
-                  <span>{{ month.receipt_count }} receipt(s)</span>
-                </div>
+          @if (monthlySpending.length > 0) {
+            <div class="line-chart">
+              <div class="line-chart-grid">
+                @for (month of monthlySpending; track month.month) {
+                  <div class="line-column">
+                    <div class="line-value">
+                      {{ month.total_spent | number:'1.0-0' }} €
+                    </div>
 
-                <div class="bar-track">
-                  <div
-                    class="bar-fill"
-                    [style.width]="getBarWidth(month.total_spent, maxMonthlySpending)"
-                  ></div>
-                </div>
+                    <div class="line-bar-wrap">
+                      <div
+                        class="line-bar"
+                        [style.height]="getBarWidth(month.total_spent, maxMonthlySpending)"
+                      ></div>
+                    </div>
 
-                <b>{{ month.total_spent | number:'1.2-2' }} EUR</b>
+                    <strong>{{ month.month }}</strong>
+                    <span>{{ month.receipt_count }} receipt(s)</span>
+                  </div>
+                }
               </div>
-            }
-          </div>
+            </div>
+          } @else {
+            <div class="empty-chart">
+              No monthly data available for the selected filters.
+            </div>
+          }
         </article>
 
-        <article class="analytics-panel">
-          <div class="panel-header">
+        <article class="analytics-card">
+          <div class="card-header">
             <div>
               <span class="panel-kicker">Merchants</span>
               <h2>Spending by merchant</h2>
             </div>
           </div>
 
-          <div class="bar-list">
-            @for (merchant of merchantSpending; track merchant.merchant_name) {
-              <div class="compact-bar-row">
-                <div class="compact-header">
-                  <strong>{{ merchant.merchant_name }}</strong>
-                  <b>{{ merchant.total_spent | number:'1.2-2' }} EUR</b>
-                </div>
+          @if (merchantSpending.length > 0) {
+            <div class="ranked-list">
+              @for (merchant of merchantSpending; track merchant.merchant_name) {
+                <div class="ranked-row">
+                  <div class="ranked-top">
+                    <div>
+                      <strong>{{ merchant.merchant_name }}</strong>
+                      <span>{{ merchant.receipt_count }} receipt(s)</span>
+                    </div>
 
-                <div class="bar-track">
-                  <div
-                    class="bar-fill"
-                    [style.width]="getBarWidth(merchant.total_spent, maxMerchantSpending)"
-                  ></div>
-                </div>
+                    <b>{{ merchant.total_spent | number:'1.2-2' }} EUR</b>
+                  </div>
 
-                <span>{{ merchant.receipt_count }} receipt(s)</span>
-              </div>
-            }
-          </div>
+                  <div class="bar-track">
+                    <div
+                      class="bar-fill"
+                      [style.width]="getBarWidth(merchant.total_spent, maxMerchantSpending)"
+                    ></div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-chart">
+              No merchant data available.
+            </div>
+          }
         </article>
 
-        <article class="analytics-panel">
-          <div class="panel-header">
+        <article class="analytics-card">
+          <div class="card-header">
             <div>
               <span class="panel-kicker">Categories</span>
-              <h2>Spending by category</h2>
+              <h2>Category distribution</h2>
             </div>
           </div>
 
-          <div class="category-cloud">
-            @for (category of categorySpending; track category.category) {
-              <article class="category-chip-card">
-                <div class="category-icon">
-                  {{ formatLabel(category.category).charAt(0) }}
-                </div>
+          @if (categorySpending.length > 0) {
+            <div class="category-visual-list">
+              @for (category of categorySpending; track category.category) {
+                <article class="category-visual-card">
+                  <div class="category-symbol">
+                    {{ formatLabel(category.category).charAt(0) }}
+                  </div>
 
-                <div>
-                  <strong>{{ formatLabel(category.category) }}</strong>
-                  <span>{{ category.total_spent | number:'1.2-2' }} EUR</span>
-                </div>
-              </article>
-            }
-          </div>
+                  <div class="category-content">
+                    <div class="category-row">
+                      <strong>{{ formatLabel(category.category) }}</strong>
+                      <b>{{ category.total_spent | number:'1.2-2' }} EUR</b>
+                    </div>
+
+                    <div class="bar-track">
+                      <div
+                        class="bar-fill"
+                        [style.width]="getBarWidth(category.total_spent, categorySpending[0].total_spent)"
+                      ></div>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="empty-chart">
+              No category data available.
+            </div>
+          }
         </article>
 
-        <article class="analytics-panel wide">
-          <div class="panel-header">
+        <article class="analytics-card wide">
+          <div class="card-header">
             <div>
               <span class="panel-kicker">Products</span>
               <h2>Top products</h2>
             </div>
           </div>
 
-          <div class="products-table">
-            <div class="products-header">
-              <span>Product</span>
-              <span>Quantity</span>
-              <span>Total spent</span>
-            </div>
+          @if (topProducts.length > 0) {
+            <div class="product-ranking">
+              @for (product of topProducts; track product.product_name; let index = $index) {
+                <article class="product-rank-row">
+                  <div class="rank-number">
+                    {{ index + 1 }}
+                  </div>
 
-            @for (product of topProducts; track product.product_name) {
-              <div class="product-row">
-                <strong>{{ product.product_name }}</strong>
-                <span>{{ product.quantity }}</span>
-                <b>{{ product.total_spent | number:'1.2-2' }} EUR</b>
-              </div>
-            }
-          </div>
+                  <div class="product-main">
+                    <strong>{{ product.product_name }}</strong>
+
+                    <div class="product-meta">
+                      <span>{{ product.quantity }} item(s)</span>
+                      @if (product.category) {
+                        <span>{{ formatLabel(product.category) }}</span>
+                      }
+                    </div>
+
+                    <div class="bar-track">
+                      <div
+                        class="bar-fill"
+                        [style.width]="getBarWidth(product.total_spent, maxProductSpending)"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <b>{{ product.total_spent | number:'1.2-2' }} EUR</b>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="empty-chart">
+              No product data available.
+            </div>
+          }
         </article>
       </section>
     }
