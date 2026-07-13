@@ -59,3 +59,22 @@ def delete_receipt(db: Session, receipt_id: int)-> Receipt | None:
     db.delete(receipt)
     db.commit()
     return receipt
+
+def update_receipt_structured_data(
+    db: Session,
+    receipt_id: int,
+    structured_data: dict,
+    validation_result: dict,
+):
+    receipt = get_receipt_by_id(db, receipt_id)
+
+    if not receipt:
+        return None
+
+    receipt.structured_data = structured_data
+    receipt.validation_result = validation_result
+
+    db.commit()
+    db.refresh(receipt)
+
+    return receipt

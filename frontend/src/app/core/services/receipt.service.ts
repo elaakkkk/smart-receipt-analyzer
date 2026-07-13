@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../constants/api.constants';
 import {
   DeleteReceiptResponse,
+  ExtractedReceiptData,
   ReceiptDetail,
   ReceiptListItem,
   UploadReceiptResponse
@@ -39,6 +40,18 @@ export class ReceiptService {
   deleteReceipt(id: number): Observable<DeleteReceiptResponse> {
     return this.http.delete<DeleteReceiptResponse>(
       `${this.baseUrl}/api/receipts/${id}`
+    );
+  }
+
+  updateStructuredData(
+    id: number,
+    structuredData: ExtractedReceiptData
+  ): Observable<ReceiptDetail> {
+    return this.http.patch<ReceiptDetail>(
+      `${this.baseUrl}/api/receipts/${id}/structured-data`,
+      {
+        structured_data: structuredData,
+      }
     );
   }
 }

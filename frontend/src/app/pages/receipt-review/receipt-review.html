@@ -1,0 +1,197 @@
+<section class="review-page">
+  <div class="review-container">
+    <a class="back-link" [routerLink]="['/receipts', receipt?.id]">
+      ← Back to receipt
+    </a>
+
+    <header class="review-hero">
+      <div>
+        <span class="eyebrow">Human review</span>
+        <h1>Correct extracted data</h1>
+        <p>
+          Edit the extracted products, prices, quantities, categories and totals.
+          The validation will be recalculated after saving.
+        </p>
+      </div>
+
+      <div class="review-summary">
+        <span>Difference</span>
+        <strong>{{ difference | number:'1.2-2' }} EUR</strong>
+        <p>Items total vs expected total</p>
+      </div>
+    </header>
+
+    @if (loading) {
+      <app-page-state
+        type="loading"
+        message="Loading review data..."
+      />
+    }
+
+    @if (errorMessage) {
+      <app-page-state
+        type="error"
+        [message]="errorMessage"
+      />
+    }
+
+    @if (successMessage) {
+      <app-page-state
+        type="success"
+        [message]="successMessage"
+      />
+    }
+
+    @if (editableData) {
+      <section class="totals-panel">
+        <label>
+          <span>Merchant</span>
+          <input [(ngModel)]="editableData.merchant_name" />
+        </label>
+
+        <label>
+          <span>Purchase date</span>
+          <input type="date" [(ngModel)]="editableData.purchase_date" />
+        </label>
+
+        <label>
+          <span>Total paid</span>
+          <input
+            type="number"
+            step="0.01"
+            [(ngModel)]="editableData.total_amount"
+          />
+        </label>
+
+        <label>
+          <span>Discount</span>
+          <input
+            type="number"
+            step="0.01"
+            [(ngModel)]="editableData.discount_amount"
+          />
+        </label>
+      </section>
+
+      <section class="balance-panel">
+        <article>
+          <span>Items total</span>
+          <strong>{{ itemsTotal | number:'1.2-2' }} EUR</strong>
+        </article>
+
+        <article>
+          <span>Expected total</span>
+          <strong>{{ expectedTotal | number:'1.2-2' }} EUR</strong>
+        </article>
+
+        <article [class.warning]="difference > 0.05">
+          <span>Difference</span>
+          <strong>{{ difference | number:'1.2-2' }} EUR</strong>
+        </article>
+      </section>
+
+      <section class="items-editor">
+        <div class="items-editor-header">
+          <div>
+            <span class="panel-kicker">Products</span>
+            <h2>Editable items</h2>
+          </div>
+
+          <button type="button" class="add-button" (click)="addItem()">
+            + Add item
+          </button>
+        </div>
+
+        <div class="items-edit-table">
+          <div class="items-edit-header">
+            <span>Product</span>
+            <span>Category</span>
+            <span>Qty</span>
+            <span>Unit</span>
+            <span>Total</span>
+            <span></span>
+          </div>
+
+          @for (item of editableData.items; track $index; let index = $index) {
+            <article class="items-edit-row">
+              <input [(ngModel)]="item.name" />
+
+              <select [(ngModel)]="item.category" (change)="recalculateTotals()">
+                <option value="fruit">Fruit</option>
+                <option value="vegetable_herb">Vegetable Herb</option>
+                <option value="dairy">Dairy</option>
+                <option value="carbohydrate">Carbohydrate</option>
+                <option value="meat">Meat</option>
+                <option value="household">Household</option>
+                <option value="snack_sweet">Snack Sweet</option>
+                <option value="protein">Protein</option>
+                <option value="cosmetics">Cosmetics</option>
+                <option value="health">Health</option>
+                <option value="beverage">Beverage</option>
+                <option value="prepared_food">Prepared Food</option>
+                <option value="other">Other</option>
+              </select>
+
+              <input
+                type="number"
+                step="0.01"
+                [(ngModel)]="item.quantity"
+                (change)="recalculateItemTotal(item)"
+              />
+
+              <input
+                type="number"
+                step="0.01"
+                [(ngModel)]="item.unit_price"
+                (change)="recalculateItemTotal(item)"
+              />
+
+              <input
+                type="number"
+                step="0.01"
+                [(ngModel)]="item.total_price"
+                (change)="recalculateTotals()"
+              />
+
+              <button
+                type="button"
+                class="remove-button"
+                (click)="removeItem(index)"
+              >
+                Delete
+              </button>
+            </article>
+          }
+        </div>
+      </section>
+
+      <footer class="review-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          [routerLink]="['/receipts', receipt?.id]"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="saving"
+          (click)="saveCorrections()"
+        >
+          {{ saving ? 'Saving...' : 'Save corrections' }}
+        </button>
+
+        <button
+          type="button"
+          class="primary-button dark"
+          [disabled]="saving"
+          (click)="saveAndReturn()"
+        >
+          Save and return
+        </button>
+      </footer>
+    }
+  </div>
+</section>

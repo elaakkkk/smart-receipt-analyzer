@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.repositories.receipt_repository import create_receipt, delete_receipt, get_receipt_by_id,get_receipts 
+from app.repositories.receipt_repository import create_receipt, delete_receipt, get_receipt_by_id,get_receipts, update_receipt_structured_data 
 
 from app.services.file_service import delete_local_file, save_uploaded_file
 from app.schemas.upload_schema import UploadReceiptResponse
 from app.services.validation_service import validate_uploaded_file
 from app.services.ocr.ocr_service import extract_text_from_file
 from app.services.classification_service import classify_document
-from app.services.extraction_service import extract_structured_data
+from app.services.extraction_service import extract_structured_data, calculate_category_totals_from_items
 from app.services.business_validation_service import validate_extracted_data
-from app.schemas.receipt_schema import DeleteReceiptResponse, ReceiptDetail, ReceiptListItem
+from app.schemas.receipt_schema import DeleteReceiptResponse, ReceiptDetail, ReceiptListItem, UpdateReceiptStructuredDataRequest
 
 router = APIRouter()
 @router.post("/upload", response_model=UploadReceiptResponse)
@@ -75,3 +75,29 @@ def delete_receipt_by_id(receipt_id: int, db: Session = Depends(get_db)):
         receipt_id=receipt_id,
         message="Receipt deleted successfully"
     )
+
+@router.patch("/{receipt_id}/structured-data", response_model=ReceiptDetail)
+def update_structured_data(
+    receipt_id: int,
+    payload: UpdateReceiptStructuredDataRequest,
+    db: Session = Depends(get_db),
+):
+    corrected_data = payload.structured_data
+
+    corrected_data.category_totals = calculate_category_totals_from_items(
+        [item.model_dump() for item in corrected_data.items]
+    )
+
+    validation_result = validate_extracted_data(corrected_data)
+
+    updated_receipt = update_receipt_structured_data(
+        db=db,
+        receipt_id=receipt_id,
+        structured_data=corrected_data.model_dump(),
+        validation_result=validation_result.model_dump(),
+    )
+
+    if not updated_receipt:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+
+    return updated_receipt

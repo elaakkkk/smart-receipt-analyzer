@@ -700,3 +700,32 @@ li {
     padding: 22px;
   }
 }
+.status-card strong.warning {
+  color: #b45309;
+}
+
+.status-card strong.invalid {
+  color: var(--color-danger);
+}
+
+.review-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  margin-top: 14px;
+  padding: 0 14px;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  transition: 0.18s ease;
+}
+
+.review-button:hover {
+  transform: translateY(-1px);
+  background: #fde68a;
+}

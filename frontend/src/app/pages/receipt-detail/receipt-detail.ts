@@ -82,28 +82,28 @@ export class ReceiptDetailComponent implements OnInit {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
+
   get extractedItems() {
     return this.receipt?.structured_data?.items ?? [];
   }
-  get extractionQuality(): string {
+
+  get validationStatusLabel(): string {
     const validation = this.receipt?.validation_result;
 
-    if (!validation) {
-      return 'Unknown';
-    }
+    if (!validation) return 'Unknown';
 
     if (!validation.is_valid) {
-      return 'Failed';
+      return 'Invalid';
     }
 
-    if (validation.warnings.length === 0) {
-      return 'Excellent';
-    }
-
-    if (validation.warnings.length <= 2) {
+    if (validation.warnings.length > 0) {
       return 'Needs review';
     }
 
-    return 'Poor';
+    return 'Valid';
+  }
+
+  get shouldShowReviewButton(): boolean {
+    return this.validationStatusLabel === 'Needs review';
   }
 }

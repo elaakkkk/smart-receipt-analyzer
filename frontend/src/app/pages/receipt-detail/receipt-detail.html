@@ -43,18 +43,26 @@
         <div class="status-card">
           <span class="status-label">Validation status</span>
 
-          <strong [class.valid]="receipt.validation_result?.is_valid">
-            {{ receipt.validation_result?.is_valid ? 'Valid' : 'Invalid' }}
+          <strong
+            [class.valid]="validationStatusLabel === 'Valid'"
+            [class.warning]="validationStatusLabel === 'Needs review'"
+            [class.invalid]="validationStatusLabel === 'Invalid'"
+          >
+            {{ validationStatusLabel }}
           </strong>
 
           <p>
             {{ receipt.validation_result?.errors?.length || 0 }} errors ·
             {{ receipt.validation_result?.warnings?.length || 0 }} warnings
           </p>
-        </div>
-        <div class="meta-card">
-          <span>Extraction quality</span>
-          <strong>{{ extractionQuality }}</strong>
+          @if (shouldShowReviewButton) {
+            <a
+              class="review-button"
+              [routerLink]="['/receipts', receipt.id, 'review']"
+            >
+              Review and correct
+            </a>
+          }
         </div>
       </header>
 

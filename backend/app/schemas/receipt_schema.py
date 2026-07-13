@@ -39,3 +39,6 @@ class ReceiptDetail(ReceiptListItem):
 class DeleteReceiptResponse(BaseModel):
     receipt_id: int
     message: str
+
+class UpdateReceiptStructuredDataRequest(BaseModel):
+    structured_data: ExtractedReceiptData
