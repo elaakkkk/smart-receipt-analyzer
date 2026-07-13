@@ -10,6 +10,7 @@ import {
 } from '../../core/models/receipt.model';
 import { ReceiptService } from '../../core/services/receipt.service';
 import { PageState } from '../../shared/components/page-state/page-state';
+import { API_BASE_URL } from '../../core/constants/api.constants';
 
 @Component({
   selector: 'app-receipt-review',
@@ -185,4 +186,10 @@ export class ReceiptReview implements OnInit {
         },
       });
   }
+
+get receiptImageUrl(): string {
+  if (!this.receipt?.saved_path) return '';
+
+  return `${API_BASE_URL}/${this.receipt.saved_path}`;
+}
 }
