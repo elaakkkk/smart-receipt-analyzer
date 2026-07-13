@@ -539,8 +539,16 @@ def is_tax_line(line: str) -> bool:
 
 def clean_item_name(name: str) -> str:
     name = name.strip()
+
+    # remove leading arrows / symbols
     name = re.sub(r"^[>\-\*\s]+", "", name)
+
+    # normalize repeated spaces
     name = re.sub(r"\s+", " ", name)
+
+    # remove isolated trailing product quantity if it was accidentally kept in the name
+    name = remove_trailing_quantity_from_name(name)
+
     return name.strip()
 
 
@@ -729,3 +737,18 @@ def normalize_ocr_text(text: str) -> str:
         .replace("montant\n", "montant ")
         .replace("a payer\n", "a payer ")
     )
+    
+def remove_trailing_quantity_from_name(name: str) -> str:
+    words = name.split()
+
+    if len(words) < 2:
+        return name
+
+    last_word = words[-1]
+
+    # Remove only a standalone quantity at the end.
+    # Do not remove values inside product sizes like 500g, 3x60ml, 4pcs.
+    if re.fullmatch(r"\d+", last_word):
+        return " ".join(words[:-1])
+
+    return name

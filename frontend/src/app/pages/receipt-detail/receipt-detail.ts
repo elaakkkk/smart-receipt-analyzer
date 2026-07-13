@@ -85,4 +85,25 @@ export class ReceiptDetailComponent implements OnInit {
   get extractedItems() {
     return this.receipt?.structured_data?.items ?? [];
   }
+  get extractionQuality(): string {
+    const validation = this.receipt?.validation_result;
+
+    if (!validation) {
+      return 'Unknown';
+    }
+
+    if (!validation.is_valid) {
+      return 'Failed';
+    }
+
+    if (validation.warnings.length === 0) {
+      return 'Excellent';
+    }
+
+    if (validation.warnings.length <= 2) {
+      return 'Needs review';
+    }
+
+    return 'Poor';
+  }
 }
