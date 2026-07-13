@@ -24,6 +24,7 @@ def extract_structured_data(
         "total_amount": total_amount,
         "discount_amount": extract_discount_amount(items_total, total_amount),
         "currency": extract_currency(extracted_text),
+        "category_totals": calculate_category_totals_from_items(items),
         "items": items,
     }
 
@@ -314,3 +315,17 @@ def calculate_raw_items_total(items: list[dict]) -> float:
     )
 
     return round(total, 2)
+
+def calculate_category_totals_from_items(items: list[dict]) -> dict[str, float]:
+    category_totals: dict[str, float] = {}
+
+    for item in items:
+        category = item.get("category") or "other"
+        total_price = item.get("total_price") or 0
+
+        category_totals[category] = round(
+            category_totals.get(category, 0) + total_price,
+            2
+        )
+
+    return category_totals

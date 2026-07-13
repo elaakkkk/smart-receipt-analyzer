@@ -14,6 +14,7 @@ class ExtractedReceiptData(BaseModel):
     total_amount: float | None = None
     discount_amount: float | None = None
     currency: str | None = "EUR"
+    category_totals: dict[str, float] = Field(default_factory=dict)
     items: list[ReceiptItem] = Field(default_factory=list)
 
 class ValidationResult(BaseModel):
