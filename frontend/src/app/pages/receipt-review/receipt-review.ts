@@ -27,6 +27,9 @@ export class ReceiptReview implements OnInit {
   errorMessage = '';
   successMessage = '';
 
+  zoomLevel = 1;
+  fitToWidth = true;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -186,10 +189,32 @@ export class ReceiptReview implements OnInit {
         },
       });
   }
+  
+  get receiptImageUrl(): string {
+    if (!this.receipt?.saved_path) return '';
 
-get receiptImageUrl(): string {
-  if (!this.receipt?.saved_path) return '';
+    return `${API_BASE_URL}/${this.receipt.saved_path}`;
+  }
 
-  return `${API_BASE_URL}/${this.receipt.saved_path}`;
-}
+  zoomIn(): void {
+    this.fitToWidth = false;
+    this.zoomLevel = Math.min(this.zoomLevel + 0.15, 2.5);
+  }
+
+  zoomOut(): void {
+    this.fitToWidth = false;
+    this.zoomLevel = Math.max(this.zoomLevel - 0.15, 0.5);
+  }
+
+  resetZoom(): void {
+    this.fitToWidth = true;
+    this.zoomLevel = 1;
+  }
+
+  get imageZoomStyle(): string {
+    if (this.fitToWidth) {
+      return '100%';
+    }
+    return `${this.zoomLevel * 100}%`;
+  }
 }

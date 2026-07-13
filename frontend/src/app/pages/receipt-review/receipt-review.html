@@ -53,10 +53,26 @@
         </div>
 
         @if (receiptImageUrl) {
+            <div class="preview-toolbar">
+            <button type="button" (click)="zoomOut()">−</button>
+
+            <span>
+                {{ fitToWidth ? 'Fit width' : (zoomLevel * 100 | number:'1.0-0') + '%' }}
+            </span>
+
+            <button type="button" (click)="zoomIn()">+</button>
+
+            <button type="button" (click)="resetZoom()">
+                Reset
+            </button>
+            </div>
+
             <div class="ticket-image-frame">
             <img
                 [src]="receiptImageUrl"
                 [alt]="receipt?.original_filename || 'Receipt image'"
+                [style.width]="imageZoomStyle"
+                [class.zoomed]="!fitToWidth"
             />
             </div>
         } @else {
