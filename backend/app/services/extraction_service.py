@@ -21,7 +21,7 @@ def extract_structured_data(
         "merchant_name": extract_merchant_name(extracted_text),
         "purchase_date": extract_purchase_date(extracted_text),
         "total_amount": total_amount,
-        "discount_amount": extract_discount_amount(items_total, total_amount),
+        "discount_amount": extract_discount_amount_from_text(extracted_text),
         "currency": extract_currency(extracted_text),
         "category_totals": calculate_category_totals_from_items(items),
         "items": items,
@@ -175,18 +175,21 @@ def extract_items(text: str) -> list[dict]:
     normalized_text = normalize_ocr_text(text)
     lines = get_clean_lines(normalized_text)
 
+    merchant_name = extract_merchant_name(text)
+
     items: list[dict] = []
 
     ignored_keywords = [
         "ticket",
         "article p.u",
+        "article p.u.eur",
         "ttc tva",
         "reduction",
         "lidl plus",
     ]
 
     for index, line in enumerate(lines):
-        lower_line = normalize_ocr_text(line.lower())
+        lower_line = normalize_ocr_text(line.lower()).strip()
 
         if is_quantity_detail_line(line):
             continue
@@ -203,11 +206,14 @@ def extract_items(text: str) -> list[dict]:
         if is_tax_line(line):
             continue
 
-        item = (
-            parse_action_item_line(line)
-            or parse_lidl_item_line(line)
-            or parse_super_u_item_line(line, lines, index)
-            or parse_leclerc_item_line(line)
+        if is_discount_line(line):
+            continue
+
+        item = parse_item_line_by_merchant(
+            line=line,
+            lines=lines,
+            index=index,
+            merchant_name=merchant_name,
         )
 
         if not item:
@@ -266,26 +272,39 @@ def parse_action_item_line(line: str) -> dict | None:
 
 
 def parse_lidl_item_line(line: str) -> dict | None:
+    """
+    Lidl format:
+    Article P.U.EUR Qté EUR
+
+    Examples:
+    Citron 750g 1,85 1 1,85 AT
+    Fromage blanc nature 1,79 1 1,79 AT
+    Papier toilette 2 pl 1,27 1 1,27 B
+    Champignon blanc 8,95 1 06,95 AT
+    """
+
+    normalized_line = normalize_lidl_line(line)
+
     pattern = re.compile(
         r"^(?P<name>.+?)\s+"
         r"(?P<unit_price>\d+[,.]\d{2})\s+"
         r"(?P<quantity>\d+(?:[,.]\d+)?)\s+"
         r"(?P<total_price>\d+[,.]\d{2})"
+        r"(?:\s+[A-Z]{1,2})?$",
+        re.IGNORECASE,
     )
 
-    match = pattern.search(line)
+    match = pattern.search(normalized_line)
 
     if not match:
         return None
 
     name = clean_item_name(match.group("name"))
     unit_price = parse_amount(match.group("unit_price"))
-    quantity = parse_quantity(match.group("quantity"))
+    quantity = parse_quantity(match.group("quantity")) or 1
     total_price = parse_amount(match.group("total_price"))
 
-    unit_price, total_price = fix_item_prices(unit_price, quantity, total_price)
-
-    if not name or total_price is None:
+    if not name or unit_price is None or total_price is None:
         return None
 
     if should_ignore_product_name(name):
@@ -539,15 +558,14 @@ def is_tax_line(line: str) -> bool:
 
 def clean_item_name(name: str) -> str:
     name = name.strip()
-
-    # remove leading arrows / symbols
     name = re.sub(r"^[>\-\*\s]+", "", name)
-
-    # normalize repeated spaces
     name = re.sub(r"\s+", " ", name)
 
-    # remove isolated trailing product quantity if it was accidentally kept in the name
-    name = remove_trailing_quantity_from_name(name)
+    # Remove trailing price if OCR kept it inside the product name
+    name = re.sub(r"\s+\d+[,.]\d{2}$", "", name)
+
+    # Remove isolated trailing tax code
+    name = re.sub(r"\s+[0-9]$", "", name)
 
     return name.strip()
 
@@ -737,7 +755,7 @@ def normalize_ocr_text(text: str) -> str:
         .replace("montant\n", "montant ")
         .replace("a payer\n", "a payer ")
     )
-    
+
 def remove_trailing_quantity_from_name(name: str) -> str:
     words = name.split()
 
@@ -752,3 +770,112 @@ def remove_trailing_quantity_from_name(name: str) -> str:
         return " ".join(words[:-1])
 
     return name
+
+def remove_lidl_tax_code(line: str) -> str:
+    """
+    Lidl OCR often ends item lines with a tax/VAT code such as:
+    Citron 750g 1,85 4
+    Fromage blanc nature 1,79 4
+
+    The final 4 is not the item price.
+    """
+    return re.sub(r"\s+[0-9]\s*$", "", line.strip())
+
+def normalize_lidl_line(line: str) -> str:
+    line = line.strip()
+
+    line = (
+        line
+        .replace("é", "e")
+        .replace("è", "e")
+        .replace("ê", "e")
+        .replace("à", "a")
+        .replace("ç", "c")
+        .replace("’", "'")
+    )
+
+    line = re.sub(r"\s+", " ", line)
+
+    # OCR sometimes reads 06,95 instead of 6,95
+    line = re.sub(r"\b0(\d,[0-9]{2})\b", r"\1", line)
+
+    # OCR sometimes adds spaces inside prices: -0, 56
+    line = re.sub(r"(\d+),\s+(\d{2})", r"\1,\2", line)
+
+    return line
+
+def is_discount_line(line: str) -> bool:
+    normalized_line = normalize_ocr_text(line).lower()
+
+    discount_keywords = [
+        "reduction",
+        "réduction",
+        "prix en baisse",
+        "total promotion",
+        "vous avez economise",
+        "vous avez économisé",
+        "coupons",
+        "offert",
+    ]
+
+    return any(keyword in normalized_line for keyword in discount_keywords)
+
+def parse_item_line_by_merchant(
+    line: str,
+    lines: list[str],
+    index: int,
+    merchant_name: str | None,
+) -> dict | None:
+    if merchant_name == "LIDL":
+        return parse_lidl_item_line(line)
+
+    if merchant_name == "SUPER U":
+        return parse_super_u_item_line(line, lines, index)
+
+    if merchant_name == "LECLERC":
+        return parse_leclerc_item_line(line)
+
+    if merchant_name == "ACTION":
+        return parse_action_item_line(line)
+
+    return (
+        parse_lidl_item_line(line)
+        or parse_super_u_item_line(line, lines, index)
+        or parse_leclerc_item_line(line)
+        or parse_action_item_line(line)
+    )
+
+def extract_discount_amount_from_text(text: str) -> float | None:
+    normalized_text = normalize_ocr_text(text.lower())
+
+    patterns = [
+        r"total promotion\s+(\d+[,.]\d{2})",
+        r"vous avez economise\s+(\d+[,.]\d{2})",
+        r"reduction lidl plus\s+-?(\d+[,.]\d{2})",
+        r"prix en baisse\s+-?(\d+[,.]\d{2})",
+    ]
+
+    discounts: list[float] = []
+
+    for pattern in patterns:
+        matches = re.findall(pattern, normalized_text, re.IGNORECASE)
+
+        for match in matches:
+            amount = parse_amount(match)
+            if amount is not None:
+                discounts.append(amount)
+
+    if not discounts:
+        return None
+
+    if "total promotion" in normalized_text:
+        total_promotion_match = re.search(
+            r"total promotion\s+(\d+[,.]\d{2})",
+            normalized_text,
+            re.IGNORECASE,
+        )
+
+        if total_promotion_match:
+            return parse_amount(total_promotion_match.group(1))
+
+    return round(sum(discounts), 2)
