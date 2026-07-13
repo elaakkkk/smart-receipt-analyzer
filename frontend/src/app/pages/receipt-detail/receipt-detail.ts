@@ -103,7 +103,27 @@ export class ReceiptDetailComponent implements OnInit {
     return 'Valid';
   }
 
-  get shouldShowReviewButton(): boolean {
-    return this.validationStatusLabel === 'Needs review';
+  get reviewButtonLabel(): string {
+    if (this.validationStatusLabel === 'Invalid') {
+      return 'Fix extraction';
+    }
+
+    if (this.validationStatusLabel === 'Needs review') {
+      return 'Review and correct';
+    }
+
+    return 'Edit extracted data';
+  }
+
+  get reviewButtonVariant(): string {
+    if (this.validationStatusLabel === 'Invalid') {
+      return 'danger';
+    }
+
+    if (this.validationStatusLabel === 'Needs review') {
+      return 'warning';
+    }
+
+    return 'neutral';
   }
 }

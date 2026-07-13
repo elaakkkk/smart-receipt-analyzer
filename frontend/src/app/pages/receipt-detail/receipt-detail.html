@@ -55,14 +55,15 @@
             {{ receipt.validation_result?.errors?.length || 0 }} errors ·
             {{ receipt.validation_result?.warnings?.length || 0 }} warnings
           </p>
-          @if (shouldShowReviewButton) {
-            <a
-              class="review-button"
-              [routerLink]="['/receipts', receipt.id, 'review']"
-            >
-              Review and correct
-            </a>
-          }
+          <a
+            class="review-button"
+            [class.warning]="reviewButtonVariant === 'warning'"
+            [class.danger]="reviewButtonVariant === 'danger'"
+            [class.neutral]="reviewButtonVariant === 'neutral'"
+            [routerLink]="['/receipts', receipt.id, 'review']"
+          >
+            {{ reviewButtonLabel }}
+          </a>
         </div>
       </header>
 
