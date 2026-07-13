@@ -53,15 +53,6 @@ def categorize_item(item_name: str) -> str:
             "pomme de terre",
             "potato",
         ],
-        "dairy": [
-            "lait",
-            "yaourt",
-            "yogurt",
-            "fromage",
-            "beurre",
-            "crème",
-            "creme",
-        ],
         "prepared_food": [
             "pizza",
             "sandwich",
@@ -69,6 +60,16 @@ def categorize_item(item_name: str) -> str:
             "lasagne",
             "burger",
             "wrap",
+        ],
+        "dairy": [
+            "lait",
+            "yaourt",
+            "yogurt",
+            "fromage",
+            "fromages",
+            "beurre",
+            "crème",
+            "creme",
         ],
         "snack_sweet": [
             "chocolat",
