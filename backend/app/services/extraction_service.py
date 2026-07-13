@@ -1,3 +1,4 @@
+from app.services import item_analytics_service
 import re
 from datetime import datetime
 
@@ -13,12 +14,17 @@ def extract_structured_data(
     Extract structured receipt data from OCR text.
     """
 
+    items = extract_items(extracted_text)
+    total_amount = extract_total_amount(extracted_text)
+    items_total = calculate_raw_items_total(items)
+
     structured_data = {
         "merchant_name": extract_merchant_name(extracted_text),
         "purchase_date": extract_purchase_date(extracted_text),
-        "total_amount": extract_total_amount(extracted_text),
+        "total_amount": total_amount,
+        "discount_amount": extract_discount_amount(items_total, total_amount),
         "currency": extract_currency(extracted_text),
-        "items": extract_items(extracted_text),
+        "items": items,
     }
 
     return ExtractedReceiptData(**structured_data)
@@ -286,3 +292,25 @@ def fix_item_prices(
         unit_price = corrected_unit_price
 
     return unit_price, total_price
+
+def extract_discount_amount(
+    items_total: float | None,
+    total_amount: float | None
+) -> float | None:
+    if items_total is None or total_amount is None:
+        return None
+
+    discount = round(items_total - total_amount, 2)
+
+    if discount <= 0:
+        return None
+
+    return discount
+
+def calculate_raw_items_total(items: list[dict]) -> float:
+    total = sum(
+        item.get("total_price") or 0
+        for item in items
+    )
+
+    return round(total, 2)

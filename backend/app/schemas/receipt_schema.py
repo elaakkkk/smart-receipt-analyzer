@@ -12,6 +12,7 @@ class ExtractedReceiptData(BaseModel):
     merchant_name: str | None = None
     purchase_date: str | None = None
     total_amount: float | None = None
+    discount_amount: float | None = None
     currency: str | None = "EUR"
     items: list[ReceiptItem] = Field(default_factory=list)
 
