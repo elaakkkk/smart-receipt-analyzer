@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
+from fastapi import Query
+from app.schemas.analytics_schema import AnalyticsInsightsResponse
+from app.services.analytics_service import build_analytics_insights
 
 from app.repositories.analytics_repository import get_analytics_summary, get_charts_data, get_document_types_stats, get_validation_stats
 from app.schemas.analytics_schema import AnalyticsChartsResponse, AnalyticsSummaryResponse, DocumentTypesStatsResponse, ValidationStatsResponse
@@ -63,3 +66,23 @@ def read_validation_stats(db: Session = Depends(get_db)):
 @router.get("/charts", response_model=AnalyticsChartsResponse)
 def read_analytics_charts(db: Session = Depends(get_db)):
     return get_charts_data(db)
+
+@router.get("/insights", response_model=AnalyticsInsightsResponse)
+def get_analytics_insights(
+    period: str = Query(default="all"),
+    date_from: str | None = Query(default=None),
+    date_to: str | None = Query(default=None),
+    merchant: str | None = Query(default=None),
+    category: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+):
+    receipts = get_receipts(db, limit=1000)
+
+    return build_analytics_insights(
+        receipts=receipts,
+        period=period,
+        date_from=date_from,
+        date_to=date_to,
+        merchant=merchant,
+        category=category,
+    )
