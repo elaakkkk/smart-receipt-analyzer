@@ -1,0 +1,184 @@
+<section class="analytics-page">
+  <div class="analytics-container">
+    <header class="analytics-hero">
+      <div>
+        <span class="eyebrow">Data analysis</span>
+        <h1>Receipt intelligence</h1>
+        <p>
+          Explore spending behavior by month, merchant, category, and product
+          from your extracted receipts.
+        </p>
+      </div>
+
+      <button class="refresh-button" type="button" (click)="loadAnalytics()">
+        Refresh data
+      </button>
+    </header>
+
+    @if (loading) {
+      <app-page-state
+        type="loading"
+        message="Loading analytics data..."
+      />
+    }
+
+    @if (errorMessage) {
+      <app-page-state
+        type="error"
+        [message]="errorMessage"
+      />
+    }
+
+    @if (!loading && !errorMessage) {
+      <section class="kpi-grid">
+        <article class="kpi-card primary">
+          <span>Total spent</span>
+          <strong>{{ totalSpent | number:'1.2-2' }} EUR</strong>
+          <p>Across all analyzed receipts</p>
+        </article>
+
+        <article class="kpi-card">
+          <span>Receipts</span>
+          <strong>{{ receiptsCount }}</strong>
+          <p>Total documents included</p>
+        </article>
+
+        <article class="kpi-card">
+          <span>Average basket</span>
+          <strong>{{ averageBasket | number:'1.2-2' }} EUR</strong>
+          <p>Average amount per receipt</p>
+        </article>
+
+        <article class="kpi-card">
+          <span>Top merchant</span>
+          <strong>{{ topMerchant }}</strong>
+          <p>Highest spending merchant</p>
+        </article>
+      </section>
+
+      <section class="main-insight">
+        <div class="main-insight-content">
+          <span class="eyebrow">Top category</span>
+          <h2>{{ topCategory }}</h2>
+          <p>
+            This category currently represents the highest spending amount
+            across extracted receipt items.
+          </p>
+        </div>
+
+        <div class="main-insight-number">
+          {{ categorySpending[0]?.total_spent || 0 | number:'1.2-2' }} EUR
+        </div>
+      </section>
+
+      <section class="analytics-grid">
+        <article class="analytics-panel wide">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Monthly trend</span>
+              <h2>Spending by month</h2>
+            </div>
+          </div>
+
+          <div class="bar-list monthly">
+            @for (month of monthlySpending; track month.month) {
+              <div class="bar-row">
+                <div class="bar-info">
+                  <strong>{{ month.month }}</strong>
+                  <span>{{ month.receipt_count }} receipt(s)</span>
+                </div>
+
+                <div class="bar-track">
+                  <div
+                    class="bar-fill"
+                    [style.width]="getBarWidth(month.total_spent, maxMonthlySpending)"
+                  ></div>
+                </div>
+
+                <b>{{ month.total_spent | number:'1.2-2' }} EUR</b>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="analytics-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Merchants</span>
+              <h2>Spending by merchant</h2>
+            </div>
+          </div>
+
+          <div class="bar-list">
+            @for (merchant of merchantSpending; track merchant.merchant_name) {
+              <div class="compact-bar-row">
+                <div class="compact-header">
+                  <strong>{{ merchant.merchant_name }}</strong>
+                  <b>{{ merchant.total_spent | number:'1.2-2' }} EUR</b>
+                </div>
+
+                <div class="bar-track">
+                  <div
+                    class="bar-fill"
+                    [style.width]="getBarWidth(merchant.total_spent, maxMerchantSpending)"
+                  ></div>
+                </div>
+
+                <span>{{ merchant.receipt_count }} receipt(s)</span>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="analytics-panel">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Categories</span>
+              <h2>Spending by category</h2>
+            </div>
+          </div>
+
+          <div class="category-cloud">
+            @for (category of categorySpending; track category.category) {
+              <article class="category-chip-card">
+                <div class="category-icon">
+                  {{ formatLabel(category.category).charAt(0) }}
+                </div>
+
+                <div>
+                  <strong>{{ formatLabel(category.category) }}</strong>
+                  <span>{{ category.total_spent | number:'1.2-2' }} EUR</span>
+                </div>
+              </article>
+            }
+          </div>
+        </article>
+
+        <article class="analytics-panel wide">
+          <div class="panel-header">
+            <div>
+              <span class="panel-kicker">Products</span>
+              <h2>Top products</h2>
+            </div>
+          </div>
+
+          <div class="products-table">
+            <div class="products-header">
+              <span>Product</span>
+              <span>Quantity</span>
+              <span>Total spent</span>
+            </div>
+
+            @for (product of topProducts; track product.product_name) {
+              <div class="product-row">
+                <strong>{{ product.product_name }}</strong>
+                <span>{{ product.quantity }}</span>
+                <b>{{ product.total_spent | number:'1.2-2' }} EUR</b>
+              </div>
+            }
+          </div>
+        </article>
+      </section>
+    }
+  </div>
+</section>
