@@ -1,7 +1,4 @@
 def classify_document(text: str) -> str:
-    """
-    Classify a document as receipt, invoice, or unknown using keyword scoring.
-    """
     normalized_text = text.lower()
 
     receipt_score = calculate_score(
@@ -16,8 +13,13 @@ def classify_document(text: str) -> str:
             "sans contact",
             "nombre de lignes",
             "merci de votre visite",
+            "merci pour votre achat",
             "total promotion",
             "lidl plus",
+            "article quantité prix",
+            "article quantite prix",
+            "methode de paiement",
+            "méthode de paiement",
             "cb",
         ],
     )

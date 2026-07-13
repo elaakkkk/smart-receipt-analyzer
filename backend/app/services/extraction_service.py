@@ -47,7 +47,7 @@ def extract_merchant_name(text: str) -> str | None:
         ("INTERMARCHE", ["intermarche"]),
         ("CASINO", ["casino"]),
         ("FRANPRIX", ["franprix"]),
-        ("ACTION", ["action"]),
+        ("ACTION", ["//action", " action", "allee de guerledan"]),
     ]
 
     for merchant, keywords in merchant_patterns:
@@ -101,6 +101,7 @@ def extract_total_amount(text: str) -> float | None:
     priority_patterns = [
         r"total\s+\d+\s+articles?\s+(\d+[,.]\d{2})",
         r"total\s*\[\d+\]\s*articles?\s+(\d+[,.]\d{2})",
+        r"total\s+\d+\s+(\d+[,.]\d{2})",
         r"(?:a payer|à payer)\s+(\d+[,.]\d{2})",
         r"cb\s+sans\s+contact\s+(\d+[,.]\d{2})",
         r"montant\s*=\s*(\d+[,.]\d{2})",
@@ -130,6 +131,7 @@ def extract_total_amount(text: str) -> float | None:
                 "cumul disponible",
                 "solde",
                 "bon achat",
+                "transaction",
             ]
         ):
             continue
@@ -202,7 +204,8 @@ def extract_items(text: str) -> list[dict]:
             continue
 
         item = (
-            parse_lidl_item_line(line)
+            parse_action_item_line(line)
+            or parse_lidl_item_line(line)
             or parse_super_u_item_line(line, lines, index)
             or parse_leclerc_item_line(line)
         )
@@ -214,6 +217,52 @@ def extract_items(text: str) -> list[dict]:
         items.append(item)
 
     return items
+
+
+def parse_action_item_line(line: str) -> dict | None:
+    """
+    Action format examples after OCR normalization:
+    milka tablette choco 300g choco 1 3,39 eur
+    hair booster shot set 3x60ml 2 4,98 eur
+    sau'cee sauce algerienne 500ml 3 6,87 eur
+    accelerate protein pancakes 150g 1 195 eur
+    innovit gommes biotiques 60pcs 1 495 eur
+    m&m's cacahuete 220g - 3005980 1 2A7E eur E
+    """
+
+    normalized_line = normalize_action_line(line)
+
+    pattern = re.compile(
+        r"^(?P<name>.+?)\s+"
+        r"(?P<quantity>\d+(?:[,.]\d+)?)\s+"
+        r"(?P<total_price>[0-9a-zA-Z,.]+)"
+        r"(?:\s*(?:eur|€)\s*[a-zA-Z]*)?\s*$",
+        re.IGNORECASE
+    )
+
+    match = pattern.search(normalized_line)
+
+    if not match:
+        return None
+
+    name = clean_item_name(match.group("name"))
+    quantity = parse_quantity(match.group("quantity")) or 1.0
+    total_price = parse_noisy_amount(match.group("total_price"))
+
+    if not name or total_price is None:
+        return None
+
+    if should_ignore_product_name(name):
+        return None
+
+    unit_price = round(total_price / quantity, 2) if quantity else total_price
+
+    return {
+        "name": name,
+        "unit_price": unit_price,
+        "quantity": quantity,
+        "total_price": total_price,
+    }
 
 
 def parse_lidl_item_line(line: str) -> dict | None:
@@ -416,6 +465,10 @@ def should_stop_item_extraction(lower_line: str) -> bool:
         "no carte",
         "votre solde",
         "ticket a conserver",
+        "methode de paiement",
+        "numero de la transaction",
+        "carte client",
+        "taux tva",
     ]
 
     stop_contains = [
@@ -453,6 +506,11 @@ def should_ignore_product_name(name: str) -> bool:
         "france",
         "tva",
         "vente",
+        "article quantite prix",
+        "allee de guerledan",
+        "methode de paiement",
+        "numero de la transaction",
+        "carte client",
     ]
 
     if any(keyword in lower_name for keyword in ignored):
@@ -524,11 +582,10 @@ def extract_discount_amount(
 
     discount = round(items_total - total_amount, 2)
 
-    # avoid false discounts caused by OCR/parser noise
     if discount <= 0:
         return None
 
-    # if the difference is too large, it is probably an extraction error
+    # Avoid false discount when extraction duplicated or polluted items.
     if total_amount > 0 and discount > total_amount * 0.35:
         return None
 
@@ -582,6 +639,64 @@ def parse_amount(value: str) -> float | None:
         return None
 
 
+def parse_noisy_amount(value: str) -> float | None:
+    normalized_value = normalize_price_token(value)
+
+    try:
+        return float(normalized_value)
+    except ValueError:
+        return None
+
+
+def normalize_price_token(value: str) -> str:
+    value = value.strip().lower()
+
+    value = (
+        value
+        .replace("€", "")
+        .replace("eur", "")
+        .replace(" ", "")
+        .replace(",", ".")
+    )
+
+    # OCR confusions
+    value = value.replace("a", "4")
+    value = value.replace("e", "")
+
+    # keep only digits and decimal point
+    value = re.sub(r"[^0-9.]", "", value)
+
+    # 195 -> 1.95
+    # 495 -> 4.95
+    # 247 -> 2.47
+    if re.fullmatch(r"\d{3}", value):
+        return f"{value[0]}.{value[1:]}"
+
+    if re.fullmatch(r"\d+\.\d{2}", value):
+        return value
+
+    return value
+
+def normalize_action_line(line: str) -> str:
+    return (
+        line.strip()
+        .replace("à", "a")
+        .replace("À", "A")
+        .replace("é", "e")
+        .replace("É", "E")
+        .replace("è", "e")
+        .replace("È", "E")
+        .replace("ê", "e")
+        .replace("Ê", "E")
+        .replace("ç", "c")
+        .replace("Ç", "C")
+        .replace("’", "'")
+        .replace("€E", " eur E")
+        .replace("€e", " eur e")
+        .replace("€", " eur")
+    )
+
+
 def parse_quantity(value: str) -> float | None:
     try:
         return float(value.replace(",", "."))
@@ -605,6 +720,12 @@ def normalize_ocr_text(text: str) -> str:
         .replace("ç", "c")
         .replace("Ç", "C")
         .replace("’", "'")
+        .replace("Méthode", "Methode")
+        .replace("méthode", "methode")
+        .replace("Numéro", "Numero")
+        .replace("numéro", "numero")
+        .replace("Quantité", "Quantite")
+        .replace("quantité", "quantite")
         .replace("montant\n", "montant ")
         .replace("a payer\n", "a payer ")
     )
