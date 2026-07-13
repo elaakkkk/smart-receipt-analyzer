@@ -5,10 +5,6 @@
             <span>←</span>
             Back to receipts
         </a>
-
-        <a class="dashboard-link" routerLink="/dashboard">
-            Dashboard
-        </a>
         </div>
 
     @if (loading) {
@@ -79,7 +75,90 @@
           <strong>{{ receipt.created_at | date:'short' }}</strong>
         </article>
       </section>
+      @if (categoryTotals.length > 0) {
+  <section class="category-summary">
+    <div class="category-summary-header">
+      <div>
+        <span class="panel-kicker">Analytics</span>
+        <h2>Spending by category</h2>
+        <p>Quick breakdown based on the extracted receipt items.</p>
+      </div>
 
+      <div class="summary-total">
+        <span>Total paid</span>
+        <strong>
+          {{ receipt.structured_data?.total_amount | number:'1.2-2' }}
+          {{ receipt.structured_data?.currency || 'EUR' }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="category-grid">
+      @for (category of categoryTotals; track category.name) {
+        <article class="category-card">
+          <div class="category-icon">
+            {{ category.name.charAt(0) }}
+          </div>
+
+          <div>
+            <span>{{ category.name }}</span>
+            <strong>
+              {{ category.amount | number:'1.2-2' }}
+              {{ receipt.structured_data?.currency || 'EUR' }}
+            </strong>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+}
+  @if (extractedItems.length > 0) {
+  <section class="items-panel">
+    <div class="items-header">
+      <div>
+        <span class="panel-kicker">Extracted items</span>
+        <h2>Receipt products</h2>
+        <p>Products detected from the OCR text and enriched with categories.</p>
+      </div>
+    </div>
+
+    <div class="items-table">
+      <div class="items-table-header">
+        <span>Product</span>
+        <span>Category</span>
+        <span>Quantity</span>
+        <span>Unit price</span>
+        <span>Total</span>
+      </div>
+
+      @for (item of extractedItems; track item.name) {
+        <article class="items-row">
+          <div class="item-name">
+            <strong>{{ item.name }}</strong>
+          </div>
+
+          <span class="item-category">
+            {{ item.category ? formatCategoryName(item.category) : 'Other' }}
+          </span>
+
+          <span>
+            {{ item.quantity || 1 }}
+          </span>
+
+          <span>
+            {{ item.unit_price | number:'1.2-2' }}
+            {{ receipt?.structured_data?.currency || 'EUR' }}
+          </span>
+
+          <strong>
+            {{ item.total_price | number:'1.2-2' }}
+            {{ receipt?.structured_data?.currency || 'EUR' }}
+          </strong>
+        </article>
+      }
+    </div>
+  </section>
+}
       <section class="analysis-grid">
         <article class="panel ocr-panel">
           <div class="panel-header">

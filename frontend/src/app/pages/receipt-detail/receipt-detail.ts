@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DatePipe, JsonPipe, DecimalPipe } from '@angular/common';
 import { finalize } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -9,7 +9,7 @@ import { PageState } from '../../shared/components/page-state/page-state';
 
 @Component({
   selector: 'app-receipt-detail',
-  imports: [DatePipe, JsonPipe, RouterLink, PageState],
+  imports: [DatePipe, JsonPipe, RouterLink, PageState, DecimalPipe],
   templateUrl: './receipt-detail.html',
   styleUrl: './receipt-detail.css',
 })
@@ -62,5 +62,27 @@ export class ReceiptDetailComponent implements OnInit {
           this.errorMessage = 'Unable to load receipt.';
         },
       });
+  }
+  get categoryTotals(): { name: string; amount: number }[] {
+    if (!this.receipt?.structured_data?.category_totals) {
+      return [];
+    }
+
+    return Object.entries(this.receipt.structured_data.category_totals).map(
+      ([name, amount]) => ({
+        name: this.formatCategoryName(name),
+        amount,
+      })
+    );
+  }
+
+  formatCategoryName(category: string): string {
+    return category
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  get extractedItems() {
+    return this.receipt?.structured_data?.items ?? [];
   }
 }

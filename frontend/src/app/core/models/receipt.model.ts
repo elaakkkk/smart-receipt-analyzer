@@ -1,9 +1,19 @@
+export interface ReceiptItem {
+  name: string;
+  unit_price: number | null;
+  quantity: number | null;
+  total_price: number | null;
+  category: string | null;
+}
+
 export interface ExtractedReceiptData {
-  merchant_name: string;
+  merchant_name: string | null;
   purchase_date: string | null;
   total_amount: number | null;
+  discount_amount: number | null;
   currency: string | null;
-  items: unknown[];
+  category_totals: Record<string, number>;
+  items: ReceiptItem[];
 }
 
 export interface ValidationResult {
@@ -33,9 +43,9 @@ export interface UploadReceiptResponse {
   content_type: string;
   saved_path: string;
   extracted_text: string;
-  document_type: string | null;
-  structured_data: ExtractedReceiptData
-  validation_result: ValidationResult
+  document_type: string;
+  structured_data: ExtractedReceiptData;
+  validation_result: ValidationResult;
   message: string;
 }
 
