@@ -64,16 +64,6 @@ class TopProductInsightItem(BaseModel):
     total_spent: float
     quantity: float
 
-
-class AnalyticsInsightsResponse(BaseModel):
-    kpis: AnalyticsKpis
-    monthly_spending: list[MonthlySpendingItem]
-    merchant_spending: list[MerchantSpendingItem]
-    category_spending: list[CategorySpendingItem]
-    top_products: list[TopProductInsightItem]
-    data_quality: DataQualityResponse
-    filter_options: FilterOptionsResponse
-
 class DataQualityResponse(BaseModel):
     score: int
     label: str
@@ -86,3 +76,12 @@ class DataQualityResponse(BaseModel):
 class FilterOptionsResponse(BaseModel):
     merchants: list[str]
     categories: list[str]
+
+class AnalyticsInsightsResponse(BaseModel):
+    kpis: AnalyticsKpis
+    monthly_spending: list[MonthlySpendingItem]
+    merchant_spending: list[MerchantSpendingItem]
+    category_spending: list[CategorySpendingItem]
+    top_products: list[TopProductInsightItem]
+    data_quality: DataQualityResponse
+    filter_options: FilterOptionsResponse

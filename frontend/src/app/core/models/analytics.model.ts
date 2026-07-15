@@ -68,10 +68,26 @@ export interface TopProductInsightItem {
   quantity: number;
 }
 
+export interface DataQualityResponse {
+  score: number;
+  label: string;
+  receipt_count: number;
+  product_line_count: number;
+  category_count: number;
+  merchant_count: number;
+}
+
+export interface FilterOptionsResponse {
+  merchants: string[];
+  categories: string[];
+}
+
 export interface AnalyticsInsightsResponse {
   kpis: AnalyticsKpis;
   monthly_spending: MonthlySpendingItem[];
   merchant_spending: MerchantSpendingItem[];
   category_spending: CategorySpendingItem[];
   top_products: TopProductInsightItem[];
+  data_quality: DataQualityResponse;
+  filter_options: FilterOptionsResponse;
 }

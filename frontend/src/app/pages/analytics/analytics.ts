@@ -40,9 +40,6 @@ export class Analytics implements OnInit {
   showAllCategories = false;
   showAllProducts = false;
 
-  allMerchantOptions: string[] = [];
-  allCategoryOptions: string[] = [];
-
   readonly minDonutSlicePercentage = 4;
 
   readonly chartWidth = 720;
@@ -78,8 +75,6 @@ export class Analytics implements OnInit {
           this.topProducts = data.top_products;
           this.categorySpending = data.category_spending;
 
-          this.updateStableFilterOptions(data);
-
           this.loading = false;
           this.cdr.detectChanges();
         },
@@ -89,24 +84,6 @@ export class Analytics implements OnInit {
           this.cdr.detectChanges();
         },
       });
-  }
-
-  private updateStableFilterOptions(data: AnalyticsInsightsResponse): void {
-    const merchants = data.merchant_spending.map(
-      (merchant) => merchant.merchant_name
-    );
-
-    const categories = data.category_spending.map(
-      (category) => category.category
-    );
-
-    this.allMerchantOptions = Array.from(
-      new Set([...this.allMerchantOptions, ...merchants])
-    ).sort();
-
-    this.allCategoryOptions = Array.from(
-      new Set([...this.allCategoryOptions, ...categories])
-    ).sort();
   }
 
   resetFilters(): void {
@@ -156,15 +133,11 @@ export class Analytics implements OnInit {
   }
 
   get merchantOptions(): string[] {
-    return this.allMerchantOptions.length > 0
-      ? this.allMerchantOptions
-      : this.merchantSpending.map((merchant) => merchant.merchant_name);
+    return this.insights?.filter_options.merchants ?? [];
   }
 
   get categoryOptions(): string[] {
-    return this.allCategoryOptions.length > 0
-      ? this.allCategoryOptions
-      : this.categorySpending.map((category) => category.category);
+    return this.insights?.filter_options.categories ?? [];
   }
 
   get visibleMerchants(): MerchantSpendingItem[] {
@@ -241,37 +214,21 @@ export class Analytics implements OnInit {
   }
 
   get dataQualityScore(): number {
-    if (this.receiptsCount === 0) return 0;
-
-    const hasProducts = this.topProducts.length > 0;
-    const hasCategories = this.categorySpending.length > 0;
-    const hasTrend = this.monthlySpending.length > 0;
-    const hasMerchants = this.merchantSpending.length > 0;
-
-    let score = 55;
-
-    if (hasProducts) score += 15;
-    if (hasCategories) score += 10;
-    if (hasTrend) score += 10;
-    if (hasMerchants) score += 10;
-
-    return Math.min(score, 100);
+    return this.insights?.data_quality.score ?? 0;
   }
 
   get dataQualityLabel(): string {
-    if (this.dataQualityScore >= 90) return 'Excellent';
-    if (this.dataQualityScore >= 75) return 'Good';
-    if (this.dataQualityScore >= 60) return 'Needs review';
-
-    return 'Poor';
+    return this.insights?.data_quality.label ?? 'No data';
   }
 
   get engineeringSummary(): string {
-    if (this.receiptsCount === 0) {
+    const quality = this.insights?.data_quality;
+
+    if (!quality || quality.receipt_count === 0) {
       return 'No processed receipts available for analytics.';
     }
 
-    return `${this.receiptsCount} receipt(s), ${this.topProducts.length} product line(s), ${this.categorySpending.length} category bucket(s), ${this.merchantSpending.length} merchant group(s).`;
+    return `${quality.receipt_count} receipt(s), ${quality.product_line_count} product line(s), ${quality.category_count} category bucket(s), ${quality.merchant_count} merchant group(s).`;
   }
 
   get dataAnalystInsight(): string {
