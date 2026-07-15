@@ -183,6 +183,13 @@ def build_analytics_insights(
         "merchant_spending": merchant_spending,
         "category_spending": category_spending,
         "top_products": top_products,
+        "data_quality": build_data_quality(
+            receipts=filtered_receipts,
+            merchant_spending=merchant_spending,
+            category_spending=category_spending,
+            top_products=top_products,
+        ),
+        "filter_options": build_filter_options(receipts),
     }
 
 
@@ -374,3 +381,77 @@ def build_top_products(
         item["quantity"] = round(item["quantity"], 2)
 
     return sorted(result, key=lambda item: item["total_spent"], reverse=True)[:limit]
+
+def build_data_quality(
+    receipts: list[Receipt],
+    merchant_spending: list[dict],
+    category_spending: list[dict],
+    top_products: list[dict],
+) -> dict:
+    receipt_count = len(receipts)
+    product_line_count = sum(
+        len((receipt.structured_data or {}).get("items") or [])
+        for receipt in receipts
+    )
+
+    category_count = len(category_spending)
+    merchant_count = len(merchant_spending)
+
+    if receipt_count == 0:
+        score = 0
+    else:
+        score = 55
+
+        if product_line_count > 0:
+            score += 15
+
+        if category_count > 0:
+            score += 10
+
+        if merchant_count > 0:
+            score += 10
+
+        if top_products:
+            score += 10
+
+        score = min(score, 100)
+
+    if score >= 90:
+        label = "Excellent"
+    elif score >= 75:
+        label = "Good"
+    elif score >= 60:
+        label = "Needs review"
+    else:
+        label = "Poor"
+
+    return {
+        "score": score,
+        "label": label,
+        "receipt_count": receipt_count,
+        "product_line_count": product_line_count,
+        "category_count": category_count,
+        "merchant_count": merchant_count,
+    }
+
+
+def build_filter_options(receipts: list[Receipt]) -> dict:
+    merchants: set[str] = set()
+    categories: set[str] = set()
+
+    for receipt in receipts:
+        data = receipt.structured_data or {}
+
+        merchant_name = data.get("merchant_name")
+        if merchant_name:
+            merchants.add(merchant_name)
+
+        items = data.get("items") or []
+        for item in items:
+            category = item.get("category") or "other"
+            categories.add(category)
+
+    return {
+        "merchants": sorted(merchants),
+        "categories": sorted(categories),
+    }

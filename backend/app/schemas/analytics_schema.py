@@ -71,3 +71,18 @@ class AnalyticsInsightsResponse(BaseModel):
     merchant_spending: list[MerchantSpendingItem]
     category_spending: list[CategorySpendingItem]
     top_products: list[TopProductInsightItem]
+    data_quality: DataQualityResponse
+    filter_options: FilterOptionsResponse
+
+class DataQualityResponse(BaseModel):
+    score: int
+    label: str
+    receipt_count: int
+    product_line_count: int
+    category_count: int
+    merchant_count: int
+
+
+class FilterOptionsResponse(BaseModel):
+    merchants: list[str]
+    categories: list[str]
