@@ -35,6 +35,21 @@
   --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.10);
 
   --container-width: 1180px;
+
+ /* Category colors */
+  --category-fruit: #22c55e;
+  --category-vegetable-herb: #14b8a6;
+  --category-dairy: #3b82f6;
+  --category-carbohydrate: #f59e0b;
+  --category-meat: #ef4444;
+  --category-household: #64748b;
+  --category-snack-sweet: #ec4899;
+  --category-protein: #8b5cf6;
+  --category-cosmetics: #d946ef;
+  --category-health: #06b6d4;
+  --category-beverage: #0ea5e9;
+  --category-prepared-food: #f97316;
+  --category-other: #94a3b8;
 }
 
 * {

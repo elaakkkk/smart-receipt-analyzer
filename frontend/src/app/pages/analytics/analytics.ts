@@ -36,6 +36,17 @@ export class Analytics implements OnInit {
   errorMessage = '';
 
   showFilters = false;
+  showAllMerchants = false;
+  showAllCategories = false;
+  showAllProducts = false;
+
+  allMerchantOptions: string[] = [];
+  allCategoryOptions: string[] = [];
+
+  readonly minDonutSlicePercentage = 4;
+
+  readonly chartWidth = 720;
+  readonly chartHeight = 240;
 
   constructor(
     private analyticsService: AnalyticsService,
@@ -61,10 +72,13 @@ export class Analytics implements OnInit {
       .subscribe({
         next: (data) => {
           this.insights = data;
+
           this.merchantSpending = data.merchant_spending;
           this.monthlySpending = data.monthly_spending;
           this.topProducts = data.top_products;
           this.categorySpending = data.category_spending;
+
+          this.updateStableFilterOptions(data);
 
           this.loading = false;
           this.cdr.detectChanges();
@@ -77,6 +91,24 @@ export class Analytics implements OnInit {
       });
   }
 
+  private updateStableFilterOptions(data: AnalyticsInsightsResponse): void {
+    const merchants = data.merchant_spending.map(
+      (merchant) => merchant.merchant_name
+    );
+
+    const categories = data.category_spending.map(
+      (category) => category.category
+    );
+
+    this.allMerchantOptions = Array.from(
+      new Set([...this.allMerchantOptions, ...merchants])
+    ).sort();
+
+    this.allCategoryOptions = Array.from(
+      new Set([...this.allCategoryOptions, ...categories])
+    ).sort();
+  }
+
   resetFilters(): void {
     this.selectedPeriod = 'all';
     this.dateFrom = '';
@@ -84,6 +116,22 @@ export class Analytics implements OnInit {
     this.selectedMerchant = '';
     this.selectedCategory = '';
     this.loadAnalytics();
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
+  toggleMerchants(): void {
+    this.showAllMerchants = !this.showAllMerchants;
+  }
+
+  toggleCategories(): void {
+    this.showAllCategories = !this.showAllCategories;
+  }
+
+  toggleProducts(): void {
+    this.showAllProducts = !this.showAllProducts;
   }
 
   get totalSpent(): number {
@@ -108,43 +156,65 @@ export class Analytics implements OnInit {
   }
 
   get merchantOptions(): string[] {
-    return this.merchantSpending.map((merchant) => merchant.merchant_name);
+    return this.allMerchantOptions.length > 0
+      ? this.allMerchantOptions
+      : this.merchantSpending.map((merchant) => merchant.merchant_name);
   }
 
   get categoryOptions(): string[] {
-    return this.categorySpending.map((category) => category.category);
+    return this.allCategoryOptions.length > 0
+      ? this.allCategoryOptions
+      : this.categorySpending.map((category) => category.category);
+  }
+
+  get visibleMerchants(): MerchantSpendingItem[] {
+    return this.showAllMerchants
+      ? this.merchantSpending
+      : this.merchantSpending.slice(0, 5);
+  }
+
+  get visibleCategories(): CategorySpendingItem[] {
+    return this.showAllCategories
+      ? this.categorySpending
+      : this.categorySpending.slice(0, 6);
+  }
+
+  get visibleProducts(): TopProductInsightItem[] {
+    return this.showAllProducts
+      ? this.topProducts
+      : this.topProducts.slice(0, 8);
   }
 
   get maxMonthlySpending(): number {
     if (this.monthlySpending.length === 0) return 0;
-    return Math.max(...this.monthlySpending.map((month) => month.total_spent));
+
+    return Math.max(
+      ...this.monthlySpending.map((month) => month.total_spent)
+    );
   }
 
   get maxMerchantSpending(): number {
     if (this.merchantSpending.length === 0) return 0;
-    return Math.max(...this.merchantSpending.map((merchant) => merchant.total_spent));
+
+    return Math.max(
+      ...this.merchantSpending.map((merchant) => merchant.total_spent)
+    );
   }
 
   get maxProductSpending(): number {
     if (this.topProducts.length === 0) return 0;
-    return Math.max(...this.topProducts.map((product) => product.total_spent));
+
+    return Math.max(
+      ...this.topProducts.map((product) => product.total_spent)
+    );
   }
 
-  getBarWidth(value: number, max: number): string {
-    if (!max || max <= 0) return '0%';
-    const percentage = Math.round((value / max) * 100);
-    return `${Math.max(percentage, 4)}%`;
-  }
+  get maxCategorySpending(): number {
+    if (this.categorySpending.length === 0) return 0;
 
-  formatLabel(value: string): string {
-    return value
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-
-  toggleFilters(): void {
-    this.showFilters = !this.showFilters;
+    return Math.max(
+      ...this.categorySpending.map((category) => category.total_spent)
+    );
   }
 
   get activeFiltersCount(): number {
@@ -168,5 +238,343 @@ export class Analytics implements OnInit {
     };
 
     return labels[this.selectedPeriod] ?? 'All time';
+  }
+
+  get dataQualityScore(): number {
+    if (this.receiptsCount === 0) return 0;
+
+    const hasProducts = this.topProducts.length > 0;
+    const hasCategories = this.categorySpending.length > 0;
+    const hasTrend = this.monthlySpending.length > 0;
+    const hasMerchants = this.merchantSpending.length > 0;
+
+    let score = 55;
+
+    if (hasProducts) score += 15;
+    if (hasCategories) score += 10;
+    if (hasTrend) score += 10;
+    if (hasMerchants) score += 10;
+
+    return Math.min(score, 100);
+  }
+
+  get dataQualityLabel(): string {
+    if (this.dataQualityScore >= 90) return 'Excellent';
+    if (this.dataQualityScore >= 75) return 'Good';
+    if (this.dataQualityScore >= 60) return 'Needs review';
+
+    return 'Poor';
+  }
+
+  get engineeringSummary(): string {
+    if (this.receiptsCount === 0) {
+      return 'No processed receipts available for analytics.';
+    }
+
+    return `${this.receiptsCount} receipt(s), ${this.topProducts.length} product line(s), ${this.categorySpending.length} category bucket(s), ${this.merchantSpending.length} merchant group(s).`;
+  }
+
+  get dataAnalystInsight(): string {
+    if (this.receiptsCount === 0) {
+      return 'No receipt data available yet.';
+    }
+
+    if (this.selectedMerchant) {
+      return `${this.selectedMerchant} represents ${this.totalSpent.toFixed(2)} EUR in the current filtered dataset.`;
+    }
+
+    if (this.selectedCategory) {
+      return `${this.formatLabel(this.selectedCategory)} is isolated to analyze category-level spending behavior.`;
+    }
+
+    return `${this.topMerchant} is currently the top merchant and ${this.topCategory} is the highest spending category.`;
+  }
+
+  get dataEngineeringInsight(): string {
+    return 'OCR extraction → document classification → JSON structuring → schema validation → business validation → analytics aggregation.';
+  }
+
+  get averageProductValue(): number {
+    if (this.topProducts.length === 0) return 0;
+
+    const total = this.topProducts.reduce(
+      (sum, product) => sum + product.total_spent,
+      0
+    );
+
+    return Number((total / this.topProducts.length).toFixed(2));
+  }
+
+  get categoryTotalSpent(): number {
+    return Number(
+      this.categorySpending
+        .reduce((total, category) => total + category.total_spent, 0)
+        .toFixed(2)
+    );
+  }
+
+  get categoryShareItems(): {
+    category: string;
+    label: string;
+    amount: number;
+    percentage: number;
+    color: string;
+  }[] {
+    if (this.categoryTotalSpent === 0) return [];
+
+    const rawItems = this.categorySpending.map((category) => {
+      const percentage = (category.total_spent / this.categoryTotalSpent) * 100;
+
+      return {
+        category: category.category,
+        label: this.formatLabel(category.category),
+        amount: category.total_spent,
+        percentage,
+        color: this.getCategoryColor(category.category),
+      };
+    });
+
+    const mainItems = rawItems.filter(
+      (item) => item.percentage >= this.minDonutSlicePercentage
+    );
+
+    const smallItems = rawItems.filter(
+      (item) => item.percentage < this.minDonutSlicePercentage
+    );
+
+    if (smallItems.length === 0) {
+      return rawItems.map((item) => ({
+        ...item,
+        percentage: Math.round(item.percentage),
+      }));
+    }
+
+    const otherAmount = smallItems.reduce(
+      (sum, item) => sum + item.amount,
+      0
+    );
+
+    return [
+      ...mainItems.map((item) => ({
+        ...item,
+        percentage: Math.round(item.percentage),
+      })),
+      {
+        category: 'other',
+        label: 'Other small categories',
+        amount: Number(otherAmount.toFixed(2)),
+        percentage: Math.round((otherAmount / this.categoryTotalSpent) * 100),
+        color: 'var(--category-other)',
+      },
+    ];
+  }
+
+  get donutGradient(): string {
+    if (this.categoryShareItems.length === 0) {
+      return 'conic-gradient(var(--color-border) 0deg 360deg)';
+    }
+
+    let currentDegree = 0;
+
+    const segments = this.categoryShareItems.map((item) => {
+      const degrees = (item.amount / this.categoryTotalSpent) * 360;
+      const start = currentDegree;
+      const end = currentDegree + degrees;
+
+      currentDegree = end;
+
+      return `${item.color} ${start}deg ${end}deg`;
+    });
+
+    return `conic-gradient(${segments.join(', ')})`;
+  }
+
+  get monthlyLinePoints(): string {
+    if (this.monthlySpending.length === 0) return '';
+
+    const max = this.maxMonthlySpending || 1;
+    const lastIndex = Math.max(this.monthlySpending.length - 1, 1);
+
+    return this.monthlySpending
+      .map((month, index) => {
+        const x = (index / lastIndex) * this.chartWidth;
+        const y =
+          this.chartHeight -
+          (month.total_spent / max) * this.chartHeight;
+
+        return `${x},${y}`;
+      })
+      .join(' ');
+  }
+
+  get monthlyAreaPoints(): string {
+    if (!this.monthlyLinePoints) return '';
+
+    return `0,${this.chartHeight} ${this.monthlyLinePoints} ${this.chartWidth},${this.chartHeight}`;
+  }
+
+  get monthlyChartDots(): {
+    x: number;
+    y: number;
+    label: string;
+    value: number;
+  }[] {
+    if (this.monthlySpending.length === 0) return [];
+
+    const max = this.maxMonthlySpending || 1;
+    const lastIndex = Math.max(this.monthlySpending.length - 1, 1);
+
+    return this.monthlySpending.map((month, index) => ({
+      x: (index / lastIndex) * this.chartWidth,
+      y:
+        this.chartHeight -
+        (month.total_spent / max) * this.chartHeight,
+      label: month.month,
+      value: month.total_spent,
+    }));
+  }
+
+  get productScatterPoints(): {
+    name: string;
+    quantity: number;
+    amount: number;
+    category: string | null;
+    x: number;
+    y: number;
+    color: string;
+  }[] {
+    if (this.topProducts.length === 0) return [];
+
+    const quantities = this.topProducts.map((product) => product.quantity || 0);
+    const amounts = this.topProducts.map((product) => product.total_spent || 0);
+
+    const minQuantity = Math.min(...quantities);
+    const maxQuantity = Math.max(...quantities);
+
+    const minAmount = Math.min(...amounts);
+    const maxAmount = Math.max(...amounts);
+
+    return this.topProducts.map((product) => {
+      const quantity = product.quantity || 0;
+      const amount = product.total_spent || 0;
+
+      return {
+        name: product.product_name,
+        quantity,
+        amount,
+        category: product.category,
+        x: this.scaleToChartPosition(quantity, minQuantity, maxQuantity),
+        y: 100 - this.scaleToChartPosition(amount, minAmount, maxAmount),
+        color: this.getCategoryColor(product.category),
+      };
+    });
+  }
+
+  get visibleCategoryShareItems(): {
+    category: string;
+    label: string;
+    amount: number;
+    percentage: number;
+    color: string;
+  }[] {
+    return this.showAllCategories
+      ? this.categoryShareItems
+      : this.categoryShareItems.slice(0, 6);
+  }
+
+  get shouldShowCategoryToggle(): boolean {
+    return this.categoryShareItems.length > 6;
+  }
+
+  get scatterXAxisTicks(): number[] {
+    if (this.topProducts.length === 0) return [];
+
+    const quantities = this.topProducts.map((product) => product.quantity || 0);
+    const min = Math.min(...quantities);
+    const max = Math.max(...quantities);
+
+    return this.buildAxisTicks(min, max);
+  }
+
+  get scatterYAxisTicks(): number[] {
+    if (this.topProducts.length === 0) return [];
+
+    const amounts = this.topProducts.map((product) => product.total_spent || 0);
+    const min = Math.min(...amounts);
+    const max = Math.max(...amounts);
+
+    return this.buildAxisTicks(min, max);
+  }
+
+  buildAxisTicks(min: number, max: number): number[] {
+    if (max === min) {
+      return [min];
+    }
+
+    const steps = 4;
+    const interval = (max - min) / steps;
+
+    return Array.from({ length: steps + 1 }, (_, index) =>
+      Number((min + interval * index).toFixed(2))
+    );
+  }
+
+  getScatterTickPosition(value: number, ticks: number[]): number {
+    if (ticks.length <= 1) {
+      return 50;
+    }
+
+    const min = ticks[0];
+    const max = ticks[ticks.length - 1];
+
+    return this.scaleToChartPosition(value, min, max);
+  }
+
+  getBarWidth(value: number, max: number): string {
+    if (!max || max <= 0) return '0%';
+
+    const percentage = Math.round((value / max) * 100);
+
+    return `${Math.max(percentage, 4)}%`;
+  }
+
+  getChartHeight(value: number, max: number): string {
+    if (!max || max <= 0) return '4%';
+
+    const percentage = Math.round((value / max) * 100);
+
+    return `${Math.max(percentage, 6)}%`;
+  }
+
+  getCategoryColor(category: string | null | undefined): string {
+    if (!category) {
+      return 'var(--category-other)';
+    }
+
+    const cssName = category.replaceAll('_', '-');
+
+    return `var(--category-${cssName}, var(--category-other))`;
+  }
+
+  formatLabel(value: string): string {
+    return value
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  scaleToChartPosition(value: number, min: number, max: number): number {
+    const padding = 10;
+
+    if (max === min) {
+      return 50;
+    }
+
+    const percentage = ((value - min) / (max - min)) * 100;
+
+    return Math.min(
+      100 - padding,
+      Math.max(padding, percentage)
+    );
   }
 }
