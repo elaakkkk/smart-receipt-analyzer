@@ -60,3 +60,35 @@ def test_get_charts_data():
     assert "validation_status" in data
     assert isinstance(data["document_types"], list)
     assert isinstance(data["validation_status"], list)
+
+def test_get_receipts_list():
+    response = client.get("/api/receipts/")
+
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+def test_get_analytics_insights():
+    response = client.get("/api/analytics/insights")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert "kpis" in data
+    assert "monthly_spending" in data
+    assert "merchant_spending" in data
+    assert "category_spending" in data
+    assert "top_products" in data
+    assert "data_quality" in data
+    assert "filter_options" in data
+
+    assert "total_spent" in data["kpis"]
+    assert "receipt_count" in data["kpis"]
+    assert "average_basket" in data["kpis"]
+
+    assert "score" in data["data_quality"]
+    assert "label" in data["data_quality"]
+
+    assert "merchants" in data["filter_options"]
+    assert "categories" in data["filter_options"]
