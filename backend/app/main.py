@@ -1,3 +1,4 @@
+from pathlib import Path
 from unicodedata import name
 from starlette.staticfiles import StaticFiles
 from fastapi import FastAPI
@@ -10,6 +11,10 @@ from app.api.routes.analytics import router as analytics_router
 
 
 Base.metadata.create_all(bind=engine)
+
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
 allowed_origin = [
     "http://localhost:4200",
     "http://127.0.0.1:4200"
@@ -31,4 +36,4 @@ app.include_router(health_router, prefix="/api", tags=["Health"])
 app.include_router(receipts_router, prefix="/api/receipts", tags=["Receipts"])
 app.include_router(analytics_router, prefix="/api/analytics", tags=["Analytics"])
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
