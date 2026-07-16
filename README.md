@@ -237,13 +237,30 @@ This project demonstrates practical full-stack engineering skills:
 It combines software engineering, AI document processing and data analytics in one complete portfolio project.
 
 ---
-## Future improvements
-- Add Docker Compose
-- Add PostgreSQL production configuration
-- Add more OCR engines
-- Add confidence score per extracted field
-- Add receipt item normalization
-- Add user authentication
-- Add export to CSV
-- Add CI with GitHub Actions
-- Add deployment documentation
+## Continuous integration
+
+The backend test suite is automatically executed with GitHub Actions on every push and pull request.
+
+The CI pipeline checks:
+
+- Python dependency installation
+- OCR system dependency installation
+- Backend unit tests
+- Analytics service tests
+
+Workflow file:
+
+```text
+.github/workflows/backend-ci.yml
+
+The frontend build is also checked automatically with GitHub Actions.
+
+Frontend CI checks:
+
+- Node.js dependency installation
+- Angular production build
+
+Workflow file:
+
+```text
+.github/workflows/frontend-ci.yml
