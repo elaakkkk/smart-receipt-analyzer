@@ -9,6 +9,9 @@ services:
       - ./backend/uploads:/app/uploads
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/smart_receipt_db
+      - UPLOAD_DIR=uploads
+      - OCR_ENGINE=tesseract
+      - APP_ENV=docker
     depends_on:
       - db
 
