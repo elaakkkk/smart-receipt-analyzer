@@ -9,3 +9,4 @@ pillow
 pytest
 httpx
 psycopg2-binary
+pdf2image

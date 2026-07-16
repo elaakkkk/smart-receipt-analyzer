@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytesseract
+from pdf2image import convert_from_path
 from PIL import Image
 
 from app.services.ocr.base_ocr import BaseOCR
@@ -20,11 +21,27 @@ class TesseractOCR(BaseOCR):
         raise ValueError(f"Unsupported file extension for OCR: {extension}")
 
     def _extract_from_image(self, path: Path) -> str:
-        image = Image.open(path)
-        text = pytesseract.image_to_string(image)
+        with Image.open(path) as image:
+            text = pytesseract.image_to_string(image)
+
         return text.strip()
 
     def _extract_from_pdf(self, path: Path) -> str:
-        raise NotImplementedError(
-            "PDF OCR is not implemented yet. We will add it in the next step."
+        pages = convert_from_path(
+            path,
+            dpi=300,
+            first_page=1,
+            last_page=5,
         )
+
+        extracted_pages: list[str] = []
+
+        for page_number, page in enumerate(pages, start=1):
+            text = pytesseract.image_to_string(page)
+
+            if text.strip():
+                extracted_pages.append(
+                    f"--- Page {page_number} ---\n{text.strip()}"
+                )
+
+        return "\n\n".join(extracted_pages).strip()
