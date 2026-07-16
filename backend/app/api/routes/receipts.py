@@ -19,7 +19,19 @@ async def upload_receipt(file : UploadFile = File(...), db: Session = Depends(ge
     dest_path = await save_uploaded_file(file)
     extracted_text = extract_text_from_file(dest_path)
     document_type = classify_document(extracted_text)
-    structured_data = extract_structured_data(extracted_text, document_type)
+    try:
+        structured_data = extract_structured_data(extracted_text, document_type)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": str(error),
+                "filename": file.filename,
+                "document_type": document_type,
+                "extracted_text_preview": extracted_text[:500],
+            },
+        ) from error
+
     validation_result = validate_extracted_data(structured_data)
     created_receipt = create_receipt(
         db=db,
