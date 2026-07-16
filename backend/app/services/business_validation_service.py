@@ -1,6 +1,9 @@
 from app.schemas.receipt_schema import ExtractedReceiptData, ValidationResult
 
 
+SUPPORTED_CURRENCIES = {"EUR", "USD", "GBP"}
+
+
 def validate_extracted_data(data: ExtractedReceiptData) -> ValidationResult:
     errors: list[str] = []
     warnings: list[str] = []
@@ -13,9 +16,13 @@ def validate_extracted_data(data: ExtractedReceiptData) -> ValidationResult:
 
     if data.total_amount is None:
         errors.append("Total amount is missing.")
+    elif data.total_amount < 0:
+        errors.append("Total amount cannot be negative.")
 
     if not data.currency:
-        warnings.append("Currency is missing.")
+        errors.append("Currency is missing.")
+    elif data.currency not in SUPPORTED_CURRENCIES:
+        errors.append(f"Unsupported currency: {data.currency}.")
 
     if not data.items:
         warnings.append("No receipt items were extracted.")
@@ -29,16 +36,13 @@ def validate_extracted_data(data: ExtractedReceiptData) -> ValidationResult:
     )
 
 
-def validate_items_total(
-    data: ExtractedReceiptData,
-    warnings: list[str]
-) -> None:
-    if data.total_amount is None or not data.items:
+def validate_items_total(data: ExtractedReceiptData, warnings: list[str]) -> None:
+    if data.total_amount is None or data.total_amount < 0 or not data.items:
         return
 
     items_total = round(
         sum(item.total_price or 0 for item in data.items),
-        2
+        2,
     )
 
     expected_total = data.total_amount
@@ -48,14 +52,7 @@ def validate_items_total(
 
     difference = round(abs(items_total - expected_total), 2)
 
-    if difference == 0:
-        return
-
     if difference <= 0.05:
-        warnings.append(
-            f"Small rounding difference detected between items total ({items_total}) "
-            f"and expected total ({expected_total})."
-        )
         return
 
     warnings.append(

@@ -1,6 +1,12 @@
 def classify_document(text: str) -> str:
     normalized_text = text.lower()
 
+    if "invoice" in normalized_text:
+        return "invoice"
+
+    if "receipt" in normalized_text:
+        return "receipt"
+
     receipt_score = calculate_score(
         normalized_text,
         [
@@ -28,10 +34,8 @@ def classify_document(text: str) -> str:
         normalized_text,
         [
             "facture",
-            "invoice",
             "numéro de facture",
             "numero de facture",
-            "invoice number",
             "date de facture",
             "billing address",
             "adresse de facturation",
