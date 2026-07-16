@@ -11,14 +11,14 @@ from app.api.routes.analytics import router as analytics_router
 
 Base.metadata.create_all(bind=engine)
 allowed_origin = [
-    "http://localhost:4300",
-    "http://127.0.0.1:4300"
+    "http://localhost:4200",
+    "http://127.0.0.1:4200"
 ]
 
 app = FastAPI(
     title="Smart Receipt Analyzer",
     description="A FastAPI application for analyzing receipts using OCR and AI models.",
-    version="0.1.0",
+    version="1.0.0",
 )
 app.add_middleware(CORSMiddleware,
     allow_origins = allowed_origin,

@@ -160,12 +160,12 @@
 
           <span>
             {{ item.unit_price | number:'1.2-2' }}
-            {{ receipt?.structured_data?.currency || 'EUR' }}
+            {{ receipt.structured_data?.currency || 'EUR' }}
           </span>
 
           <strong>
             {{ item.total_price | number:'1.2-2' }}
-            {{ receipt?.structured_data?.currency || 'EUR' }}
+            {{ receipt.structured_data?.currency || 'EUR' }}
           </strong>
         </article>
       }

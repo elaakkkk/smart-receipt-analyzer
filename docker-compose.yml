@@ -1,27 +1,37 @@
 services:
-  fastapi:
-    build: ./backend
-    container_name: fastapi
+  backend:
+    build:
+      context: ./backend
+    container_name: smart-receipt-backend
     ports:
-      - "8000:80"
-    env_file:
-      - .env
+      - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/smart_receipt_db
     depends_on:
       - db
-    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: smart-receipt-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
 
   db:
-    image: postgres:16
-    container_name: db
+    image: postgres:16-alpine
+    container_name: smart-receipt-db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=smart_receipt_db
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  db_data:
+  postgres_data:

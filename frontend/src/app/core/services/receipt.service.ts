@@ -20,7 +20,7 @@ export class ReceiptService {
   constructor(private http: HttpClient) {}
 
   getReceipts(): Observable<ReceiptListItem[]> {
-    return this.http.get<ReceiptListItem[]>(`${this.baseUrl}/api/receipts`);
+    return this.http.get<ReceiptListItem[]>(`${this.baseUrl}/api/receipts/`);
   }
 
   getReceiptById(id: number): Observable<ReceiptDetail> {
